@@ -1,103 +1,232 @@
-import Image from "next/image";
+import { prisma } from "@/lib/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  Building2,
+  ListChecks,
+  ImageIcon,
+  Brain,
+  Bell,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+async function getStats() {
+  const [
+    totalExchanges,
+    turkishExchanges,
+    globalExchanges,
+    totalFeatures,
+    totalScreenshots,
+    classifiedScreenshots,
+    pendingUpdates,
+    totalCells,
+    availableCells,
+  ] = await Promise.all([
+    prisma.exchange.count(),
+    prisma.exchange.count({ where: { marketType: "turkish" } }),
+    prisma.exchange.count({ where: { marketType: "global" } }),
+    prisma.feature.count(),
+    prisma.screenshot.count(),
+    prisma.screenshot.count({ where: { featureId: { not: null } } }),
+    prisma.featureUpdateSuggestion.count({ where: { status: "pending" } }),
+    prisma.exchangeFeature.count(),
+    prisma.exchangeFeature.count({ where: { hasFeature: true } }),
+  ]);
+
+  const maxCells = totalExchanges * totalFeatures;
+  const coveragePercentage = maxCells > 0
+    ? Math.round((totalCells / maxCells) * 100)
+    : 0;
+
+  return {
+    totalExchanges,
+    turkishExchanges,
+    globalExchanges,
+    totalFeatures,
+    totalScreenshots,
+    classifiedScreenshots,
+    unclassifiedScreenshots: totalScreenshots - classifiedScreenshots,
+    pendingUpdates,
+    coveragePercentage,
+    availableFeatures: availableCells,
+  };
+}
+
+async function getExchangeCoverage() {
+  const exchanges = await prisma.exchange.findMany({
+    include: {
+      _count: {
+        select: { exchangeFeatures: { where: { hasFeature: true } } },
+      },
+    },
+    orderBy: { name: "asc" },
+  });
+
+  const totalFeatures = await prisma.feature.count();
+
+  return exchanges.map((e) => ({
+    name: e.name,
+    marketType: e.marketType,
+    count: e._count.exchangeFeatures,
+    total: totalFeatures,
+    percentage: totalFeatures > 0
+      ? Math.round((e._count.exchangeFeatures / totalFeatures) * 100)
+      : 0,
+  }));
+}
+
+export default async function DashboardPage() {
+  const [stats, coverage] = await Promise.all([
+    getStats(),
+    getExchangeCoverage(),
+  ]);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        {stats.pendingUpdates > 0 && (
+          <Link href="/admin/updates">
+            <Badge variant="destructive" className="text-sm px-3 py-1 cursor-pointer">
+              <Bell className="h-3 w-3 mr-1" />
+              {stats.pendingUpdates} AI önerisi onay bekliyor
+            </Badge>
+          </Link>
+        )}
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Borsalar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{stats.totalExchanges}</p>
+            <p className="text-xs text-muted-foreground">
+              {stats.turkishExchanges} TR / {stats.globalExchanges} Global
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+              <ListChecks className="h-4 w-4" />
+              Özellikler
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{stats.totalFeatures}</p>
+            <p className="text-xs text-muted-foreground">
+              {stats.availableFeatures} aktif
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+              <ImageIcon className="h-4 w-4" />
+              Screenshotlar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{stats.totalScreenshots}</p>
+            <p className="text-xs text-muted-foreground">
+              {stats.classifiedScreenshots} sınıflandırılmış
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Matrix Kapsam
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{stats.coveragePercentage}%</p>
+            <Progress value={stats.coveragePercentage} className="h-1.5 mt-1" />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Access */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Link href="/exchanges">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-4 text-center">
+              <Building2 className="h-8 w-8 mx-auto text-primary mb-2" />
+              <p className="text-sm font-medium">Borsalar</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/matrix">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-4 text-center">
+              <ListChecks className="h-8 w-8 mx-auto text-primary mb-2" />
+              <p className="text-sm font-medium">Feature Matrix</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/classify">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-4 text-center">
+              <Brain className="h-8 w-8 mx-auto text-primary mb-2" />
+              <p className="text-sm font-medium">AI Sınıflandır</p>
+              {stats.unclassifiedScreenshots > 0 && (
+                <Badge variant="secondary" className="mt-1">
+                  {stats.unclassifiedScreenshots}
+                </Badge>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-4 text-center">
+              <Brain className="h-8 w-8 mx-auto text-primary mb-2" />
+              <p className="text-sm font-medium">Admin</p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Coverage Chart */}
+      {coverage.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Borsa Başına Feature Kapsam</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {coverage.map((item) => (
+              <div key={item.name} className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2">
+                    {item.name}
+                    <Badge variant={item.marketType === "turkish" ? "default" : "secondary"} className="text-xs">
+                      {item.marketType === "turkish" ? "TR" : "Global"}
+                    </Badge>
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    {item.count}/{item.total} ({item.percentage}%)
+                  </span>
+                </div>
+                <Progress value={item.percentage} className="h-2" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Exchange {
+  id          String   @id @default(uuid())
+  name        String
+  logoUrl     String?
+  websiteUrl  String?
+  marketType  String   // 'turkish' | 'global'
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  screenshots      Screenshot[]
+  exchangeFeatures ExchangeFeature[]
+  updateSuggestions FeatureUpdateSuggestion[]
+
+  @@map("exchanges")
+}
+
+model FeatureCategory {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  icon        String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  features    Feature[]
+  screenshots Screenshot[]
+
+  @@map("feature_categories")
+}
+
+model Feature {
+  id          String   @id @default(uuid())
+  categoryId  String
+  name        String
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  category         FeatureCategory          @relation(fields: [categoryId], references: [id])
+  screenshots      Screenshot[]
+  exchangeFeatures ExchangeFeature[]
+  updateSuggestions FeatureUpdateSuggestion[]
+
+  @@map("features")
+}
+
+model Screenshot {
+  id               String    @id @default(uuid())
+  exchangeId       String
+  featureId        String?
+  categoryId       String?
+  s3Url            String
+  thumbnailUrl     String?
+  aiClassification Json?
+  aiConfidence     Float?
+  isVerified       Boolean   @default(false)
+  notes            String?
+  uploadedAt       DateTime  @default(now())
+  classifiedAt     DateTime?
+
+  exchange Exchange         @relation(fields: [exchangeId], references: [id])
+  feature  Feature?         @relation(fields: [featureId], references: [id])
+  category FeatureCategory? @relation(fields: [categoryId], references: [id])
+
+  @@map("screenshots")
+}
+
+model ExchangeFeature {
+  id            String  @id @default(uuid())
+  exchangeId    String
+  featureId     String
+  hasFeature    Boolean @default(false)
+  featureStatus String  @default("not_available")
+  notes         String?
+
+  exchange Exchange @relation(fields: [exchangeId], references: [id])
+  feature  Feature  @relation(fields: [featureId], references: [id])
+
+  @@unique([exchangeId, featureId])
+  @@map("exchange_features")
+}
+
+model FeatureUpdateSuggestion {
+  id              String    @id @default(uuid())
+  exchangeId      String
+  featureId       String
+  oldStatus       String
+  suggestedStatus String
+  aiConfidence    Float
+  evidence        String?
+  sourceUrl       String?
+  status          String    @default("pending")
+  reviewedBy      String?
+  createdAt       DateTime  @default(now())
+  reviewedAt      DateTime?
+
+  exchange Exchange @relation(fields: [exchangeId], references: [id])
+  feature  Feature  @relation(fields: [featureId], references: [id])
+
+  @@map("feature_update_suggestions")
+}
+
+model FeatureUpdateLog {
+  id           String   @id @default(uuid())
+  exchangeId   String
+  featureId    String
+  oldStatus    String
+  newStatus    String
+  updateSource String
+  updatedBy    String?
+  createdAt    DateTime @default(now())
+
+  @@map("feature_update_log")
+}
