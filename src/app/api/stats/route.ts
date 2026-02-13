@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+const hasFeatureData = { exchangeFeatures: { some: {} } };
+
 export async function GET() {
   const [
     totalExchanges,
@@ -13,9 +15,9 @@ export async function GET() {
     totalCells,
     availableCells,
   ] = await Promise.all([
-    prisma.exchange.count(),
-    prisma.exchange.count({ where: { marketType: "turkish" } }),
-    prisma.exchange.count({ where: { marketType: "global" } }),
+    prisma.exchange.count({ where: hasFeatureData }),
+    prisma.exchange.count({ where: { marketType: "turkish", ...hasFeatureData } }),
+    prisma.exchange.count({ where: { marketType: "global", ...hasFeatureData } }),
     prisma.feature.count(),
     prisma.screenshot.count(),
     prisma.screenshot.count({ where: { featureId: { not: null } } }),

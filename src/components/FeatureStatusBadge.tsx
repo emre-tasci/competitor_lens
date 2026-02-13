@@ -1,56 +1,72 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Check, X, Clock, AlertTriangle, HelpCircle } from "lucide-react";
 
 interface FeatureStatusBadgeProps {
   status: string;
   compact?: boolean;
 }
 
-const statusConfig: Record<string, { label: string; className: string; icon: string }> = {
+const statusConfig: Record<string, {
+  label: string;
+  className: string;
+  compactClassName: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = {
   available: {
     label: "VAR",
-    className: "bg-green-100 text-green-800 border-green-200",
-    icon: "✅",
+    className: "bg-success/10 text-success border-success/20",
+    compactClassName: "bg-success/10 text-success",
+    icon: Check,
   },
   not_available: {
     label: "YOK",
-    className: "bg-red-100 text-red-800 border-red-200",
-    icon: "❌",
+    className: "bg-destructive/10 text-destructive border-destructive/20",
+    compactClassName: "bg-destructive/10 text-destructive",
+    icon: X,
   },
   beta: {
     label: "Beta",
-    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    icon: "🔶",
+    className: "bg-warning/10 text-warning-foreground border-warning/20",
+    compactClassName: "bg-warning/10 text-warning-foreground",
+    icon: AlertTriangle,
   },
   coming_soon: {
     label: "Yakında",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
-    icon: "🔜",
+    className: "bg-info/10 text-info border-info/20",
+    compactClassName: "bg-info/10 text-info",
+    icon: Clock,
   },
   unknown: {
     label: "Belirsiz",
-    className: "bg-gray-100 text-gray-600 border-gray-200",
-    icon: "❓",
+    className: "bg-muted text-muted-foreground border-muted",
+    compactClassName: "bg-muted text-muted-foreground",
+    icon: HelpCircle,
   },
 };
 
 export function FeatureStatusBadge({ status, compact }: FeatureStatusBadgeProps) {
   const config = statusConfig[status] || statusConfig.unknown;
+  const Icon = config.icon;
 
   if (compact) {
     return (
       <span
-        className={cn("inline-flex items-center justify-center w-6 h-6 text-xs rounded", config.className)}
+        className={cn(
+          "inline-flex items-center justify-center w-7 h-7 rounded-md transition-colors",
+          config.compactClassName
+        )}
         title={config.label}
       >
-        {config.icon}
+        <Icon className="h-3.5 w-3.5" />
       </span>
     );
   }
 
   return (
-    <Badge variant="outline" className={cn("text-xs", config.className)}>
-      {config.icon} {config.label}
+    <Badge variant="outline" className={cn("text-xs gap-1", config.className)}>
+      <Icon className="h-3 w-3" />
+      {config.label}
     </Badge>
   );
 }

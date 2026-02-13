@@ -52,7 +52,7 @@ export function ScreenshotLightbox({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden backdrop-blur-md animate-scale-in">
         <div className="relative flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
@@ -112,6 +112,22 @@ export function ScreenshotLightbox({
                 <ChevronRight className="h-6 w-6" />
               </Button>
             )}
+          </div>
+
+          {/* Keyboard hints */}
+          <div className="flex items-center justify-center gap-4 p-2.5 border-t bg-muted/30 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">←</kbd>
+              Önceki
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">→</kbd>
+              Sonraki
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Esc</kbd>
+              Kapat
+            </span>
           </div>
         </div>
       </DialogContent>

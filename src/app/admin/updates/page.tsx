@@ -12,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, X, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Check, X, Loader2, Brain } from "lucide-react";
 
 interface Suggestion {
   id: string;
@@ -28,6 +29,28 @@ interface Suggestion {
   reviewedAt: string | null;
   exchange: { id: string; name: string; marketType: string };
   feature: { id: string; name: string; category: { name: string } };
+}
+
+function SuggestionSkeletonGrid() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="border rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-1.5 w-full rounded-full" />
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 flex-1 rounded-lg" />
+            <Skeleton className="h-8 flex-1 rounded-lg" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function UpdatesPage() {
@@ -115,12 +138,20 @@ export default function UpdatesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">AI Güncelleme Önerileri</h1>
+      <div className="animate-fade-in-up">
+        <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
+          <div className="bg-primary/10 rounded-xl p-2.5">
+            <Brain className="h-6 w-6 text-primary" />
+          </div>
+          AI Güncelleme Önerileri
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Yapay zeka tarafından önerilen durum güncellemelerini inceleyin
+        </p>
       </div>
 
-      <Tabs value={tab} onValueChange={setTab}>
-        <div className="flex items-center justify-between">
+      <Tabs value={tab} onValueChange={setTab} className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <TabsList>
             <TabsTrigger value="pending">Bekleyen</TabsTrigger>
             <TabsTrigger value="approved">Onaylanan</TabsTrigger>
@@ -145,8 +176,8 @@ export default function UpdatesPage() {
         </div>
 
         {/* Bulk Actions */}
-        {tab === "pending" && suggestions.length > 0 && (
-          <div className="flex items-center gap-2 mt-4 p-3 bg-muted rounded-lg">
+        {tab === "pending" && suggestions.length > 0 && !loading && (
+          <div className="flex items-center gap-2 mt-4 p-3 bg-primary/5 border border-primary/20 rounded-xl">
             <Button variant="outline" size="sm" onClick={selectAll}>
               {selected.size === suggestions.length
                 ? "Seçimi Kaldır"
@@ -183,14 +214,20 @@ export default function UpdatesPage() {
 
         <TabsContent value={tab} className="mt-4">
           {loading ? (
-            <div className="flex items-center justify-center py-20 text-muted-foreground">
-              Yükleniyor...
-            </div>
+            <SuggestionSkeletonGrid />
           ) : suggestions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {tab === "pending"
-                ? "Bekleyen öneri yok"
-                : "Bu kategoride öneri yok"}
+            <div className="text-center py-16">
+              <div className="bg-muted/50 rounded-2xl p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                <Brain className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="font-medium text-muted-foreground">
+                {tab === "pending"
+                  ? "Bekleyen öneri yok"
+                  : "Bu kategoride öneri yok"}
+              </h3>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                AI yeni öneriler ürettiğinde burada görünecek
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -7,11 +7,11 @@ export async function GET(request: NextRequest) {
 
   const exchangeWhere = marketType ? { marketType } : {};
 
-  const [exchanges, categories, cells, lastLog] = await Promise.all([
+  const [allExchanges, categories, cells, lastLog] = await Promise.all([
     prisma.exchange.findMany({
       where: exchangeWhere,
       orderBy: { name: "asc" },
-      select: { id: true, name: true, marketType: true },
+      select: { id: true, name: true, marketType: true, _count: { select: { exchangeFeatures: true } } },
     }),
     prisma.featureCategory.findMany({
       orderBy: { sortOrder: "asc" },
@@ -39,6 +39,11 @@ export async function GET(request: NextRequest) {
       select: { createdAt: true },
     }),
   ]);
+
+  // Only include exchanges that have feature data
+  const exchanges = allExchanges
+    .filter((e) => e._count.exchangeFeatures > 0)
+    .map(({ _count, ...rest }) => rest);
 
   // Build cell map: cells[exchangeId][featureId]
   const cellMap: Record<string, Record<string, typeof cells[0]>> = {};

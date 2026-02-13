@@ -2,6 +2,7 @@ export const FEATURE_CATEGORY_MAP: Record<string, string> = {
   // Platform
   "web app": "Platform",
   "mobile app": "Platform",
+  "desktop app": "Platform",
   "corporate registration": "Platform",
   "public api": "Platform",
   "api management": "Platform",
@@ -13,6 +14,7 @@ export const FEATURE_CATEGORY_MAP: Record<string, string> = {
   "sign in with gmail": "Authentication",
   "sign in with apple": "Authentication",
   "sign in with telegram": "Authentication",
+  "sign in with wallet": "Authentication",
   "login with qr": "Authentication",
 
   // Trading
@@ -31,6 +33,7 @@ export const FEATURE_CATEGORY_MAP: Record<string, string> = {
   "try nemalandirma": "Earn",
   "auto-invest (dca)": "Earn",
   "loan borrowing": "Earn",
+  "vip loan": "Earn",
 
   // Ecosystem
   "own stablecoin": "Ecosystem",

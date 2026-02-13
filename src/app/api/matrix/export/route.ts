@@ -6,7 +6,10 @@ export async function GET(request: NextRequest) {
   const marketType = searchParams.get("marketType");
   const format = searchParams.get("format") || "csv";
 
-  const exchangeWhere = marketType ? { marketType } : {};
+  const exchangeWhere = {
+    ...(marketType ? { marketType } : {}),
+    exchangeFeatures: { some: {} },
+  };
 
   const [exchanges, categories, cells] = await Promise.all([
     prisma.exchange.findMany({

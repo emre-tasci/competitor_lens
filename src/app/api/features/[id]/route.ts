@@ -16,7 +16,7 @@ export async function GET(
         orderBy: { exchange: { name: "asc" } },
       },
       screenshots: {
-        include: { exchange: true },
+        include: { exchange: true, category: true },
         orderBy: { uploadedAt: "desc" },
       },
     },

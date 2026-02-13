@@ -5,7 +5,10 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const marketType = searchParams.get("marketType");
 
-  const where = marketType ? { marketType } : {};
+  const where = {
+    ...(marketType ? { marketType } : {}),
+    exchangeFeatures: { some: {} },
+  };
 
   const exchanges = await prisma.exchange.findMany({
     where,

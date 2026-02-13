@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Check, X, ExternalLink } from "lucide-react";
+import { Check, X, ExternalLink, Brain } from "lucide-react";
 import { FeatureStatusBadge } from "./FeatureStatusBadge";
 
 interface UpdateSuggestionCardProps {
@@ -42,9 +42,16 @@ export function UpdateSuggestionCard({
 }: UpdateSuggestionCardProps) {
   const confidencePercent = Math.round(aiConfidence * 100);
 
+  const confidenceColor =
+    confidencePercent >= 80
+      ? "text-success"
+      : confidencePercent >= 60
+        ? "text-warning-foreground"
+        : "text-destructive";
+
   return (
     <Card
-      className={`${selected ? "ring-2 ring-primary" : ""} ${status !== "pending" ? "opacity-60" : ""}`}
+      className={`card-hover ${selected ? "ring-2 ring-primary" : ""} ${status !== "pending" ? "opacity-60" : ""}`}
     >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
@@ -54,9 +61,12 @@ export function UpdateSuggestionCard({
                 type="checkbox"
                 checked={selected}
                 onChange={() => onSelect(id)}
-                className="rounded"
+                className="rounded border-input"
               />
             )}
+            <div className="bg-primary/10 rounded-lg p-1.5">
+              <Brain className="h-3.5 w-3.5 text-primary" />
+            </div>
             <CardTitle className="text-sm">{exchangeName}</CardTitle>
             <Badge variant="outline" className="text-xs">
               {categoryName}
@@ -78,16 +88,16 @@ export function UpdateSuggestionCard({
           <FeatureStatusBadge status={suggestedStatus} />
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">AI Güven Skoru</span>
-            <span className="font-medium">{confidencePercent}%</span>
+            <span className={`font-semibold ${confidenceColor}`}>{confidencePercent}%</span>
           </div>
           <Progress value={confidencePercent} className="h-1.5" />
         </div>
 
         {evidence && (
-          <p className="text-xs text-muted-foreground bg-muted p-2 rounded">
+          <p className="text-xs text-muted-foreground bg-muted/50 p-2.5 rounded-lg leading-relaxed">
             {evidence}
           </p>
         )}

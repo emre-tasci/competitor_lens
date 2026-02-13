@@ -1,18 +1,18 @@
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Building2,
   ListChecks,
   ImageIcon,
-  Brain,
   Bell,
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { DashboardChartsLoader } from "@/components/DashboardCharts";
 
 export const dynamic = "force-dynamic";
+
+const hasFeatureData = { exchangeFeatures: { some: {} } };
 
 async function getStats() {
   const [
@@ -26,9 +26,9 @@ async function getStats() {
     totalCells,
     availableCells,
   ] = await Promise.all([
-    prisma.exchange.count(),
-    prisma.exchange.count({ where: { marketType: "turkish" } }),
-    prisma.exchange.count({ where: { marketType: "global" } }),
+    prisma.exchange.count({ where: hasFeatureData }),
+    prisma.exchange.count({ where: { marketType: "turkish", ...hasFeatureData } }),
+    prisma.exchange.count({ where: { marketType: "global", ...hasFeatureData } }),
     prisma.feature.count(),
     prisma.screenshot.count(),
     prisma.screenshot.count({ where: { featureId: { not: null } } }),
@@ -56,177 +56,92 @@ async function getStats() {
   };
 }
 
-async function getExchangeCoverage() {
-  const exchanges = await prisma.exchange.findMany({
-    include: {
-      _count: {
-        select: { exchangeFeatures: { where: { hasFeature: true } } },
-      },
-    },
-    orderBy: { name: "asc" },
-  });
-
-  const totalFeatures = await prisma.feature.count();
-
-  return exchanges.map((e) => ({
-    name: e.name,
-    marketType: e.marketType,
-    count: e._count.exchangeFeatures,
-    total: totalFeatures,
-    percentage: totalFeatures > 0
-      ? Math.round((e._count.exchangeFeatures / totalFeatures) * 100)
-      : 0,
-  }));
-}
-
 export default async function DashboardPage() {
-  const [stats, coverage] = await Promise.all([
-    getStats(),
-    getExchangeCoverage(),
-  ]);
+  const stats = await getStats();
+
+  const statCards = [
+    {
+      label: "Borsalar",
+      value: stats.totalExchanges,
+      sub: `${stats.turkishExchanges} TR / ${stats.globalExchanges} Global`,
+      icon: Building2,
+    },
+    {
+      label: "Özellikler",
+      value: stats.totalFeatures,
+      sub: `${stats.availableFeatures} aktif`,
+      icon: ListChecks,
+    },
+    {
+      label: "Screenshotlar",
+      value: stats.totalScreenshots,
+      sub: `${stats.classifiedScreenshots} sınıflandırılmış`,
+      icon: ImageIcon,
+    },
+    {
+      label: "Matrix Kapsam",
+      value: `${stats.coveragePercentage}%`,
+      sub: "veri kapsam oranı",
+      icon: TrendingUp,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between animate-fade-in-up">
+        <div>
+          <h1 className="text-3xl font-bold gradient-text">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Borsa özellik karşılaştırma platformuna genel bakış
+          </p>
+        </div>
         {stats.pendingUpdates > 0 && (
           <Link href="/admin/updates">
-            <Badge variant="destructive" className="text-sm px-3 py-1 cursor-pointer">
-              <Bell className="h-3 w-3 mr-1" />
-              {stats.pendingUpdates} AI önerisi onay bekliyor
-            </Badge>
+            <Card className="card-hover cursor-pointer border-warning/30 bg-warning/5">
+              <CardContent className="flex items-center gap-3 py-3 px-4">
+                <div className="bg-warning/10 rounded-lg p-2">
+                  <Bell className="h-4 w-4 text-warning-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{stats.pendingUpdates} AI önerisi</p>
+                  <p className="text-xs text-muted-foreground">Onay bekliyor</p>
+                </div>
+              </CardContent>
+            </Card>
           </Link>
         )}
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              Borsalar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{stats.totalExchanges}</p>
-            <p className="text-xs text-muted-foreground">
-              {stats.turkishExchanges} TR / {stats.globalExchanges} Global
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-              <ListChecks className="h-4 w-4" />
-              Özellikler
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{stats.totalFeatures}</p>
-            <p className="text-xs text-muted-foreground">
-              {stats.availableFeatures} aktif
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
-              Screenshotlar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{stats.totalScreenshots}</p>
-            <p className="text-xs text-muted-foreground">
-              {stats.classifiedScreenshots} sınıflandırılmış
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Matrix Kapsam
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{stats.coveragePercentage}%</p>
-            <Progress value={stats.coveragePercentage} className="h-1.5 mt-1" />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Access */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link href="/exchanges">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-4 text-center">
-              <Building2 className="h-8 w-8 mx-auto text-primary mb-2" />
-              <p className="text-sm font-medium">Borsalar</p>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/matrix">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-4 text-center">
-              <ListChecks className="h-8 w-8 mx-auto text-primary mb-2" />
-              <p className="text-sm font-medium">Feature Matrix</p>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/classify">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-4 text-center">
-              <Brain className="h-8 w-8 mx-auto text-primary mb-2" />
-              <p className="text-sm font-medium">AI Sınıflandır</p>
-              {stats.unclassifiedScreenshots > 0 && (
-                <Badge variant="secondary" className="mt-1">
-                  {stats.unclassifiedScreenshots}
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/admin">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-4 text-center">
-              <Brain className="h-8 w-8 mx-auto text-primary mb-2" />
-              <p className="text-sm font-medium">Admin</p>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Coverage Chart */}
-      {coverage.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Borsa Başına Feature Kapsam</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {coverage.map((item) => (
-              <div key={item.name} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
-                    {item.name}
-                    <Badge variant={item.marketType === "turkish" ? "default" : "secondary"} className="text-xs">
-                      {item.marketType === "turkish" ? "TR" : "Global"}
-                    </Badge>
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    {item.count}/{item.total} ({item.percentage}%)
-                  </span>
+        {statCards.map((stat, i) => (
+          <Card
+            key={stat.label}
+            className="card-hover animate-fade-in-up relative overflow-hidden"
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <div className="bg-primary/10 rounded-xl p-2.5">
+                  <stat.icon className="h-4 w-4 text-primary" />
                 </div>
-                <Progress value={item.percentage} className="h-2" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+                {stat.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {stat.sub}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Charts - loaded client-side */}
+      <DashboardChartsLoader />
     </div>
   );
 }

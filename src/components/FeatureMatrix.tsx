@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { FeatureStatusBadge } from "./FeatureStatusBadge";
 import { MarketTypeFilter } from "./MarketTypeFilter";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, RefreshCw, Pencil, Lock } from "lucide-react";
+import { Download, RefreshCw, Pencil, Lock, Info } from "lucide-react";
 import { toast } from "sonner";
 import type { MatrixData, FeatureStatus } from "@/types";
 
@@ -107,8 +108,9 @@ export function FeatureMatrix() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+        <span className="text-sm text-muted-foreground">Matrix yükleniyor...</span>
       </div>
     );
   }
@@ -117,15 +119,17 @@ export function FeatureMatrix() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <MarketTypeFilter value={marketType} onChange={setMarketType} />
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <MarketTypeFilter value={marketType} onChange={setMarketType} />
           {data.lastUpdated && (
             <span className="text-xs text-muted-foreground">
               Son güncelleme:{" "}
               {new Date(data.lastUpdated).toLocaleDateString("tr-TR")}
             </span>
           )}
+        </div>
+        <div className="flex items-center gap-2">
           <Button
             variant={editMode ? "default" : "outline"}
             size="sm"
@@ -146,24 +150,27 @@ export function FeatureMatrix() {
       </div>
 
       {editMode && (
-        <div className="text-xs text-muted-foreground bg-muted/50 rounded p-2">
-          Hücrelere tıklayarak durumu değiştirebilirsiniz: VAR → YOK → Beta → Yakında → VAR
+        <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/20 rounded-lg p-3">
+          <Info className="h-4 w-4 text-primary shrink-0" />
+          <span className="text-muted-foreground">
+            Hücrelere tıklayarak durumu değiştirebilirsiniz: VAR → YOK → Beta → Yakında → VAR
+          </span>
         </div>
       )}
 
-      <div className="border rounded-lg overflow-auto max-h-[calc(100vh-200px)]">
+      <div className="border rounded-xl overflow-auto max-h-[calc(100vh-200px)]">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-20 bg-background">
             <tr>
-              <th className="sticky left-0 z-30 bg-background border-b border-r p-2 text-left min-w-[200px]">
+              <th className="sticky left-0 z-30 bg-background border-b border-r p-2.5 text-left min-w-[200px]">
                 Özellik
               </th>
               {data.exchanges.map((exchange) => (
                 <th
                   key={exchange.id}
-                  className="border-b border-r p-2 text-center min-w-[80px] whitespace-nowrap"
+                  className="border-b border-r p-2.5 text-center min-w-[80px] whitespace-nowrap"
                 >
-                  <span className="text-xs">{exchange.name}</span>
+                  <span className="text-xs font-medium">{exchange.name}</span>
                 </th>
               ))}
             </tr>
@@ -174,23 +181,25 @@ export function FeatureMatrix() {
                 {/* Category header row */}
                 <tr
                   key={`cat-${category.id}`}
-                  className="bg-muted/50 cursor-pointer hover:bg-muted"
+                  className="bg-primary/5 cursor-pointer hover:bg-primary/8 transition-colors"
                   onClick={() => toggleCategory(category.id)}
                 >
                   <td
-                    className="sticky left-0 z-10 bg-muted/50 border-b border-r p-2 font-semibold text-xs"
+                    className="sticky left-0 z-10 bg-primary/5 border-b border-r p-2.5 font-semibold text-xs"
                     colSpan={1}
                   >
-                    {collapsedCategories.has(category.id) ? "▶" : "▼"}{" "}
-                    {category.name}
-                    <span className="ml-1 text-muted-foreground font-normal">
-                      ({category.features.length})
+                    <span className="flex items-center gap-2">
+                      {collapsedCategories.has(category.id) ? "▶" : "▼"}{" "}
+                      {category.name}
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                        {category.features.length}
+                      </Badge>
                     </span>
                   </td>
                   {data.exchanges.map((exchange) => (
                     <td
                       key={`cat-${category.id}-${exchange.id}`}
-                      className="border-b border-r p-2"
+                      className="border-b border-r p-2.5"
                     />
                   ))}
                 </tr>
@@ -198,8 +207,8 @@ export function FeatureMatrix() {
                 {/* Feature rows */}
                 {!collapsedCategories.has(category.id) &&
                   category.features.map((feature) => (
-                    <tr key={feature.id} className="hover:bg-muted/30">
-                      <td className="sticky left-0 z-10 bg-background border-b border-r p-2 pl-6 text-xs">
+                    <tr key={feature.id} className="hover:bg-accent/30 transition-colors">
+                      <td className="sticky left-0 z-10 bg-background border-b border-r p-2.5 pl-6 text-xs">
                         {feature.name}
                       </td>
                       {data.exchanges.map((exchange) => {
@@ -214,7 +223,7 @@ export function FeatureMatrix() {
                             key={cellKey}
                             className={`border-b border-r p-1 text-center ${
                               editMode
-                                ? "cursor-pointer hover:bg-accent/50 transition-colors"
+                                ? "cursor-pointer hover:bg-primary/10 transition-colors"
                                 : ""
                             } ${isSaving ? "opacity-50" : ""}`}
                             onClick={() =>

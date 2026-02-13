@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const [exchanges, features] = await Promise.all([
     prisma.exchange.findMany({
       where: {
+        exchangeFeatures: { some: {} },
         OR: [
           { name: { contains: query, mode: "insensitive" } },
           { description: { contains: query, mode: "insensitive" } },

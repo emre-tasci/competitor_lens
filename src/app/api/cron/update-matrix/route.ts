@@ -9,7 +9,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const exchanges = await prisma.exchange.findMany();
+  const exchanges = await prisma.exchange.findMany({
+    where: { exchangeFeatures: { some: {} } },
+  });
   const results = [];
 
   for (const exchange of exchanges) {

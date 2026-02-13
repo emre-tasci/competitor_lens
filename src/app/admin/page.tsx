@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Bell } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Trash2, Bell, Settings } from "lucide-react";
 import Link from "next/link";
 
 interface Exchange {
@@ -32,6 +33,7 @@ export default function AdminPage() {
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   // New exchange form
   const [newExchangeName, setNewExchangeName] = useState("");
@@ -56,6 +58,7 @@ export default function AdminPage() {
       }
       setCategories(Object.entries(cats).map(([id, name]) => ({ id, name })));
       setPendingCount(stats.pendingUpdates || 0);
+      setLoading(false);
     });
   }, []);
 
@@ -101,129 +104,154 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Admin</h1>
+      <div className="flex items-center justify-between animate-fade-in-up">
+        <div>
+          <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
+            <div className="bg-primary/10 rounded-xl p-2.5">
+              <Settings className="h-6 w-6 text-primary" />
+            </div>
+            Admin
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Borsalar, özellikler ve veri yönetimi
+          </p>
+        </div>
         {pendingCount > 0 && (
           <Link href="/admin/updates">
-            <Badge variant="destructive" className="cursor-pointer">
-              <Bell className="h-3 w-3 mr-1" />
-              {pendingCount} AI önerisi
-            </Badge>
+            <Card className="card-hover cursor-pointer border-warning/30 bg-warning/5">
+              <CardContent className="flex items-center gap-3 py-3 px-4">
+                <div className="bg-warning/10 rounded-lg p-2">
+                  <Bell className="h-4 w-4 text-warning-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{pendingCount} AI önerisi</p>
+                  <p className="text-xs text-muted-foreground">Onay bekliyor</p>
+                </div>
+              </CardContent>
+            </Card>
           </Link>
         )}
       </div>
 
-      <Tabs defaultValue="import">
-        <TabsList>
-          <TabsTrigger value="import">Excel Import</TabsTrigger>
-          <TabsTrigger value="exchanges">Borsalar</TabsTrigger>
-          <TabsTrigger value="features">Özellikler</TabsTrigger>
-        </TabsList>
+      {loading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-48 w-full rounded-xl" />
+        </div>
+      ) : (
+        <Tabs defaultValue="import" className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+          <TabsList>
+            <TabsTrigger value="import">Excel Import</TabsTrigger>
+            <TabsTrigger value="exchanges">Borsalar ({exchanges.length})</TabsTrigger>
+            <TabsTrigger value="features">Özellikler</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="import" className="mt-4">
-          <ExcelImporter />
-        </TabsContent>
+          <TabsContent value="import" className="mt-4">
+            <ExcelImporter />
+          </TabsContent>
 
-        <TabsContent value="exchanges" className="mt-4 space-y-4">
-          {/* Create Exchange */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Yeni Borsa Ekle</CardTitle>
-            </CardHeader>
-            <CardContent className="flex gap-2">
-              <Input
-                placeholder="Borsa adı"
-                value={newExchangeName}
-                onChange={(e) => setNewExchangeName(e.target.value)}
-              />
-              <Select value={newExchangeType} onValueChange={setNewExchangeType}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="turkish">TR</SelectItem>
-                  <SelectItem value="global">Global</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                placeholder="Website URL"
-                value={newExchangeUrl}
-                onChange={(e) => setNewExchangeUrl(e.target.value)}
-              />
-              <Button onClick={createExchange}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
+          <TabsContent value="exchanges" className="mt-4 space-y-4">
+            {/* Create Exchange */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Yeni Borsa Ekle</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col md:flex-row gap-2">
+                <Input
+                  placeholder="Borsa adı"
+                  value={newExchangeName}
+                  onChange={(e) => setNewExchangeName(e.target.value)}
+                />
+                <Select value={newExchangeType} onValueChange={setNewExchangeType}>
+                  <SelectTrigger className="w-full md:w-[120px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="turkish">TR</SelectItem>
+                    <SelectItem value="global">Global</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="Website URL"
+                  value={newExchangeUrl}
+                  onChange={(e) => setNewExchangeUrl(e.target.value)}
+                />
+                <Button onClick={createExchange}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
 
-          {/* Exchange List */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Borsalar ({exchanges.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {exchanges.map((e) => (
-                <div
-                  key={e.id}
-                  className="flex items-center justify-between p-2 rounded hover:bg-accent"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">{e.name}</span>
-                    <Badge
-                      variant={
-                        e.marketType === "turkish" ? "default" : "secondary"
-                      }
-                      className="text-xs"
-                    >
-                      {e.marketType === "turkish" ? "TR" : "Global"}
-                    </Badge>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteExchange(e.id)}
+            {/* Exchange List */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">
+                  Borsalar ({exchanges.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {exchanges.map((e) => (
+                  <div
+                    key={e.id}
+                    className="flex items-center justify-between p-2.5 rounded-lg hover:bg-accent/50 transition-colors"
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{e.name}</span>
+                      <Badge
+                        variant={
+                          e.marketType === "turkish" ? "default" : "secondary"
+                        }
+                        className="text-xs"
+                      >
+                        {e.marketType === "turkish" ? "TR" : "Global"}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteExchange(e.id)}
+                      className="hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="features" className="mt-4 space-y-4">
-          {/* Create Feature */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Yeni Özellik Ekle</CardTitle>
-            </CardHeader>
-            <CardContent className="flex gap-2">
-              <Input
-                placeholder="Özellik adı"
-                value={newFeatureName}
-                onChange={(e) => setNewFeatureName(e.target.value)}
-              />
-              <Select value={newFeatureCat} onValueChange={setNewFeatureCat}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="Kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={createFeature}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="features" className="mt-4 space-y-4">
+            {/* Create Feature */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Yeni Özellik Ekle</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col md:flex-row gap-2">
+                <Input
+                  placeholder="Özellik adı"
+                  value={newFeatureName}
+                  onChange={(e) => setNewFeatureName(e.target.value)}
+                />
+                <Select value={newFeatureCat} onValueChange={setNewFeatureCat}>
+                  <SelectTrigger className="w-full md:w-[160px]">
+                    <SelectValue placeholder="Kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={createFeature}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     const contentType = response.ContentType || "image/png";
 
-    return new NextResponse(bytes, {
+    return new NextResponse(Buffer.from(bytes), {
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400",
