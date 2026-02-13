@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { classifyScreenshot } from "@/lib/xai";
-import { getScreenshotUrl } from "@/lib/s3";
+import { getScreenshotBase64 } from "@/lib/s3";
+
+export const maxDuration = 300;
+
+function extractFolderHint(s3Url: string): string | undefined {
+  // s3Url format: screenshots/{Exchange}/{SubFolder}/filename.png
+  const parts = s3Url.split("/");
+  if (parts.length > 3) {
+    return parts.slice(2, -1).join("/"); // e.g. "KYC", "Onboarding", "TRY Nemalandırma"
+  }
+  return undefined;
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -36,15 +47,20 @@ export async function POST(request: NextRequest) {
     select: { id: true, name: true, categoryId: true },
   });
 
+  const categoryNames = categories.map((c) => c.name);
+  const featureNames = features.map((f) => f.name);
   const results = [];
 
   for (const screenshot of screenshots) {
     try {
-      const imageUrl = getScreenshotUrl(screenshot.s3Url);
+      const imageBase64 = await getScreenshotBase64(screenshot.s3Url);
+      const folderHint = extractFolderHint(screenshot.s3Url);
+
       const classification = await classifyScreenshot(
-        imageUrl,
-        categories.map((c) => c.name),
-        features.map((f) => f.name)
+        imageBase64,
+        categoryNames,
+        featureNames,
+        folderHint
       );
 
       const matchedFeature = features.find(

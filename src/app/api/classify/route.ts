@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { classifyScreenshot } from "@/lib/xai";
-import { getScreenshotUrl } from "@/lib/s3";
+import { getScreenshotBase64 } from "@/lib/s3";
+
+function extractFolderHint(s3Url: string): string | undefined {
+  const parts = s3Url.split("/");
+  if (parts.length > 3) {
+    return parts.slice(2, -1).join("/");
+  }
+  return undefined;
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -31,24 +39,23 @@ export async function POST(request: NextRequest) {
     select: { name: true },
   });
   const features = await prisma.feature.findMany({
-    select: { name: true },
+    select: { id: true, name: true, categoryId: true },
   });
 
-  const imageUrl = getScreenshotUrl(screenshot.s3Url);
+  const imageBase64 = await getScreenshotBase64(screenshot.s3Url);
+  const folderHint = extractFolderHint(screenshot.s3Url);
 
   const classification = await classifyScreenshot(
-    imageUrl,
+    imageBase64,
     categories.map((c) => c.name),
-    features.map((f) => f.name)
+    features.map((f) => f.name),
+    folderHint
   );
 
   // Find matching feature and category
-  const matchedFeature = await prisma.feature.findFirst({
-    where: {
-      name: { equals: classification.feature, mode: "insensitive" },
-    },
-    include: { category: true },
-  });
+  const matchedFeature = features.find(
+    (f) => f.name.toLowerCase() === classification.feature.toLowerCase()
+  );
 
   // Update screenshot with classification
   const updated = await prisma.screenshot.update({

@@ -16,36 +16,49 @@ export interface ClassificationResult {
 }
 
 export async function classifyScreenshot(
-  imageUrl: string,
+  imageBase64: string,
   categories: string[],
-  features: string[]
+  features: string[],
+  folderHint?: string
 ): Promise<ClassificationResult> {
+  const hintText = folderHint
+    ? `\n\nİPUCU: Bu screenshot "${folderHint}" klasöründen geldi. Bu bilgiyi sınıflandırmada dikkate al ama görseldeki içeriğe öncelik ver.`
+    : "";
+
+  // Determine media type from base64 header or default to png
+  const mediaType = imageBase64.startsWith("/9j/") ? "image/jpeg" : "image/png";
+  const dataUrl = `data:${mediaType};base64,${imageBase64}`;
+
   const response = await getXaiClient().chat.completions.create({
     model: "grok-2-vision-1212",
     messages: [
       {
         role: "system",
-        content:
-          "Sen bir kripto para borsası uzmanısın. Ekran görüntülerini analiz edip hangi feature kategorisine ait olduğunu belirliyorsun. Sadece JSON döndür.",
+        content: `Sen bir kripto para borsası uzmanısın. Ekran görüntülerini analiz edip hangi feature kategorisine ve özelliğe ait olduğunu belirliyorsun.
+Ekran görüntüsünde gördüğün UI elementlerini, metinleri ve akışı dikkatlice incele.
+Sadece JSON döndür, başka açıklama yazma.`,
       },
       {
         role: "user",
         content: [
-          { type: "image_url", image_url: { url: imageUrl } },
+          { type: "image_url", image_url: { url: dataUrl } },
           {
             type: "text",
-            text: `Bu kripto borsası ekran görüntüsünü analiz et.
+            text: `Bu kripto borsası ekran görüntüsünü analiz et ve hangi özelliğe/akışa ait olduğunu belirle.
 
 Olası kategoriler: ${JSON.stringify(categories)}
 Olası özellikler: ${JSON.stringify(features)}
+${hintText}
+
+Eğer yukarıdaki özelliklerden biriyle tam eşleşmiyorsa, en yakın olanı seç.
 
 JSON formatında döndür:
 {
   "category": "kategori adı",
   "feature": "özellik adı",
   "confidence": 0.0-1.0,
-  "description": "kısa açıklama",
-  "ui_elements": ["tespit edilen UI elementleri"]
+  "description": "Bu ekranda ne görünüyor, kısa açıklama",
+  "ui_elements": ["tespit edilen UI elementleri - butonlar, formlar, listeler vs."]
 }`,
           },
         ],
