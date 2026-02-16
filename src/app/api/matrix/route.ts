@@ -1,62 +1,73 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
+
+const getCachedMatrix = unstable_cache(
+  async (marketType: string | null) => {
+    const exchangeWhere = marketType ? { marketType } : {};
+
+    const [allExchanges, categories, cells, lastLog] = await Promise.all([
+      prisma.exchange.findMany({
+        where: exchangeWhere,
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, marketType: true, _count: { select: { exchangeFeatures: true } } },
+      }),
+      prisma.featureCategory.findMany({
+        orderBy: { sortOrder: "asc" },
+        include: {
+          features: {
+            orderBy: { sortOrder: "asc" },
+            select: { id: true, name: true, slug: true },
+          },
+        },
+      }),
+      prisma.exchangeFeature.findMany({
+        where: marketType
+          ? { exchange: { marketType } }
+          : {},
+        select: {
+          exchangeId: true,
+          featureId: true,
+          hasFeature: true,
+          featureStatus: true,
+          notes: true,
+        },
+      }),
+      prisma.featureUpdateLog.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    const exchanges = allExchanges
+      .filter((e) => e._count.exchangeFeatures > 0)
+      .map(({ _count, ...rest }) => rest);
+
+    const cellMap: Record<string, Record<string, typeof cells[0]>> = {};
+    for (const cell of cells) {
+      if (!cellMap[cell.exchangeId]) cellMap[cell.exchangeId] = {};
+      cellMap[cell.exchangeId][cell.featureId] = cell;
+    }
+
+    return {
+      exchanges,
+      categories,
+      cells: cellMap,
+      lastUpdated: lastLog?.createdAt?.toISOString() || null,
+    };
+  },
+  ["api-matrix"],
+  { revalidate: 60 }
+);
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const marketType = searchParams.get("marketType");
 
-  const exchangeWhere = marketType ? { marketType } : {};
+  const data = await getCachedMatrix(marketType);
 
-  const [allExchanges, categories, cells, lastLog] = await Promise.all([
-    prisma.exchange.findMany({
-      where: exchangeWhere,
-      orderBy: { name: "asc" },
-      select: { id: true, name: true, marketType: true, _count: { select: { exchangeFeatures: true } } },
-    }),
-    prisma.featureCategory.findMany({
-      orderBy: { sortOrder: "asc" },
-      include: {
-        features: {
-          orderBy: { sortOrder: "asc" },
-          select: { id: true, name: true, slug: true },
-        },
-      },
-    }),
-    prisma.exchangeFeature.findMany({
-      where: marketType
-        ? { exchange: { marketType } }
-        : {},
-      select: {
-        exchangeId: true,
-        featureId: true,
-        hasFeature: true,
-        featureStatus: true,
-        notes: true,
-      },
-    }),
-    prisma.featureUpdateLog.findFirst({
-      orderBy: { createdAt: "desc" },
-      select: { createdAt: true },
-    }),
-  ]);
-
-  // Only include exchanges that have feature data
-  const exchanges = allExchanges
-    .filter((e) => e._count.exchangeFeatures > 0)
-    .map(({ _count, ...rest }) => rest);
-
-  // Build cell map: cells[exchangeId][featureId]
-  const cellMap: Record<string, Record<string, typeof cells[0]>> = {};
-  for (const cell of cells) {
-    if (!cellMap[cell.exchangeId]) cellMap[cell.exchangeId] = {};
-    cellMap[cell.exchangeId][cell.featureId] = cell;
-  }
-
-  return NextResponse.json({
-    exchanges,
-    categories,
-    cells: cellMap,
-    lastUpdated: lastLog?.createdAt?.toISOString() || null,
+  return NextResponse.json(data, {
+    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
   });
 }
 

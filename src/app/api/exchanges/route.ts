@@ -1,38 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
+
+const getCachedExchanges = unstable_cache(
+  async (marketType: string | null) => {
+    const where = {
+      ...(marketType ? { marketType } : {}),
+      exchangeFeatures: { some: {} },
+    };
+
+    const [exchanges, totalFeatures] = await Promise.all([
+      prisma.exchange.findMany({
+        where,
+        include: {
+          _count: {
+            select: {
+              screenshots: true,
+              exchangeFeatures: { where: { hasFeature: true } },
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+      }),
+      prisma.feature.count(),
+    ]);
+
+    return exchanges.map((e) => ({
+      ...e,
+      featureCount: e._count.exchangeFeatures,
+      totalFeatures,
+    }));
+  },
+  ["api-exchanges"],
+  { revalidate: 60 }
+);
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const marketType = searchParams.get("marketType");
 
-  const where = {
-    ...(marketType ? { marketType } : {}),
-    exchangeFeatures: { some: {} },
-  };
+  const result = await getCachedExchanges(marketType);
 
-  const exchanges = await prisma.exchange.findMany({
-    where,
-    include: {
-      _count: {
-        select: {
-          screenshots: true,
-          exchangeFeatures: { where: { hasFeature: true } },
-        },
-      },
-    },
-    orderBy: { name: "asc" },
+  return NextResponse.json(result, {
+    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
   });
-
-  // Get total features count for coverage calculation
-  const totalFeatures = await prisma.feature.count();
-
-  const result = exchanges.map((e) => ({
-    ...e,
-    featureCount: e._count.exchangeFeatures,
-    totalFeatures,
-  }));
-
-  return NextResponse.json(result);
 }
 
 export async function POST(request: NextRequest) {

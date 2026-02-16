@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ interface ExchangeCardProps {
   screenshotCount: number;
 }
 
-export function ExchangeCard({
+export const ExchangeCard = React.memo(function ExchangeCard({
   id,
   name,
   marketType,
@@ -68,4 +69,4 @@ export function ExchangeCard({
       </Card>
     </Link>
   );
-}
+});

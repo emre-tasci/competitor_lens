@@ -172,9 +172,9 @@ export function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/api/stats")
+    fetch("/api/stats/pending")
       .then((r) => r.json())
-      .then((data) => setPendingCount(data.pendingUpdates || 0))
+      .then((data) => setPendingCount(data.pendingCount || 0))
       .catch(() => {});
   }, []);
 

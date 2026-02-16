@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Building2,
@@ -8,53 +9,57 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
-import { DashboardChartsLoader } from "@/components/DashboardCharts";
+import { DashboardChartsLazy } from "@/components/DashboardChartsLazy";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const hasFeatureData = { exchangeFeatures: { some: {} } };
 
-async function getStats() {
-  const [
-    totalExchanges,
-    turkishExchanges,
-    globalExchanges,
-    totalFeatures,
-    totalScreenshots,
-    classifiedScreenshots,
-    pendingUpdates,
-    totalCells,
-    availableCells,
-  ] = await Promise.all([
-    prisma.exchange.count({ where: hasFeatureData }),
-    prisma.exchange.count({ where: { marketType: "turkish", ...hasFeatureData } }),
-    prisma.exchange.count({ where: { marketType: "global", ...hasFeatureData } }),
-    prisma.feature.count(),
-    prisma.screenshot.count(),
-    prisma.screenshot.count({ where: { featureId: { not: null } } }),
-    prisma.featureUpdateSuggestion.count({ where: { status: "pending" } }),
-    prisma.exchangeFeature.count(),
-    prisma.exchangeFeature.count({ where: { hasFeature: true } }),
-  ]);
+const getStats = unstable_cache(
+  async () => {
+    const [
+      totalExchanges,
+      turkishExchanges,
+      globalExchanges,
+      totalFeatures,
+      totalScreenshots,
+      classifiedScreenshots,
+      pendingUpdates,
+      totalCells,
+      availableCells,
+    ] = await Promise.all([
+      prisma.exchange.count({ where: hasFeatureData }),
+      prisma.exchange.count({ where: { marketType: "turkish", ...hasFeatureData } }),
+      prisma.exchange.count({ where: { marketType: "global", ...hasFeatureData } }),
+      prisma.feature.count(),
+      prisma.screenshot.count(),
+      prisma.screenshot.count({ where: { featureId: { not: null } } }),
+      prisma.featureUpdateSuggestion.count({ where: { status: "pending" } }),
+      prisma.exchangeFeature.count(),
+      prisma.exchangeFeature.count({ where: { hasFeature: true } }),
+    ]);
 
-  const maxCells = totalExchanges * totalFeatures;
-  const coveragePercentage = maxCells > 0
-    ? Math.round((totalCells / maxCells) * 100)
-    : 0;
+    const maxCells = totalExchanges * totalFeatures;
+    const coveragePercentage = maxCells > 0
+      ? Math.round((totalCells / maxCells) * 100)
+      : 0;
 
-  return {
-    totalExchanges,
-    turkishExchanges,
-    globalExchanges,
-    totalFeatures,
-    totalScreenshots,
-    classifiedScreenshots,
-    unclassifiedScreenshots: totalScreenshots - classifiedScreenshots,
-    pendingUpdates,
-    coveragePercentage,
-    availableFeatures: availableCells,
-  };
-}
+    return {
+      totalExchanges,
+      turkishExchanges,
+      globalExchanges,
+      totalFeatures,
+      totalScreenshots,
+      classifiedScreenshots,
+      unclassifiedScreenshots: totalScreenshots - classifiedScreenshots,
+      pendingUpdates,
+      coveragePercentage,
+      availableFeatures: availableCells,
+    };
+  },
+  ["dashboard-stats"],
+  { revalidate: 60 }
+);
 
 export default async function DashboardPage() {
   const stats = await getStats();
@@ -141,7 +146,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Charts - loaded client-side */}
-      <DashboardChartsLoader />
+      <DashboardChartsLazy />
     </div>
   );
 }

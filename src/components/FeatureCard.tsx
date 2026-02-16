@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ interface FeatureCardProps {
   screenshotCount: number;
 }
 
-export function FeatureCard({
+export const FeatureCard = React.memo(function FeatureCard({
   id,
   name,
   categoryName,
@@ -59,4 +60,4 @@ export function FeatureCard({
       </Card>
     </Link>
   );
-}
+});

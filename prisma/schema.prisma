@@ -73,6 +73,9 @@ model Screenshot {
   feature  Feature?         @relation(fields: [featureId], references: [id])
   category FeatureCategory? @relation(fields: [categoryId], references: [id])
 
+  @@index([exchangeId])
+  @@index([featureId])
+  @@index([classifiedAt])
   @@map("screenshots")
 }
 
@@ -88,6 +91,9 @@ model ExchangeFeature {
   feature  Feature  @relation(fields: [featureId], references: [id])
 
   @@unique([exchangeId, featureId])
+  @@index([exchangeId])
+  @@index([featureId])
+  @@index([exchangeId, hasFeature])
   @@map("exchange_features")
 }
 
@@ -108,6 +114,7 @@ model FeatureUpdateSuggestion {
   exchange Exchange @relation(fields: [exchangeId], references: [id])
   feature  Feature  @relation(fields: [featureId], references: [id])
 
+  @@index([status])
   @@map("feature_update_suggestions")
 }
 
@@ -121,5 +128,7 @@ model FeatureUpdateLog {
   updatedBy    String?
   createdAt    DateTime @default(now())
 
+  @@index([exchangeId])
+  @@index([featureId])
   @@map("feature_update_log")
 }

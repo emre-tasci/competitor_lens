@@ -1,3 +1,4 @@
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Check, X, Clock, AlertTriangle, HelpCircle } from "lucide-react";
@@ -45,7 +46,7 @@ const statusConfig: Record<string, {
   },
 };
 
-export function FeatureStatusBadge({ status, compact }: FeatureStatusBadgeProps) {
+export const FeatureStatusBadge = React.memo(function FeatureStatusBadge({ status, compact }: FeatureStatusBadgeProps) {
   const config = statusConfig[status] || statusConfig.unknown;
   const Icon = config.icon;
 
@@ -69,4 +70,4 @@ export function FeatureStatusBadge({ status, compact }: FeatureStatusBadgeProps)
       {config.label}
     </Badge>
   );
-}
+});

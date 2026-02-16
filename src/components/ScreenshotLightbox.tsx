@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getScreenshotUrl } from "@/lib/utils";
 
 interface Screenshot {
@@ -72,14 +72,9 @@ export function ScreenshotLightbox({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                {currentIndex + 1} / {screenshots.length}
-              </span>
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <span className="text-sm text-muted-foreground">
+              {currentIndex + 1} / {screenshots.length}
+            </span>
           </div>
 
           {/* Image */}

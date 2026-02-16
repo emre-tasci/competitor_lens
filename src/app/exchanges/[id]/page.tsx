@@ -7,7 +7,7 @@ import { GroupedScreenshotGallery } from "@/components/GroupedScreenshotGallery"
 import { Building2, Globe, ExternalLink, Camera, CheckCircle, ListChecks } from "lucide-react";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function ExchangeDetailPage({
   params,
