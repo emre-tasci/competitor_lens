@@ -119,7 +119,7 @@ function DashboardCharts({ coverage, radarData, exchangeNames }: ChartsData) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[350px]">
+          <div style={{ height: Math.max(350, barData.length * 36) }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={barData}
@@ -137,7 +137,7 @@ function DashboardCharts({ coverage, radarData, exchangeNames }: ChartsData) {
                 <YAxis
                   type="category"
                   dataKey="name"
-                  width={100}
+                  width={130}
                   tick={{ fontSize: 11, fill: "var(--foreground)" }}
                   axisLine={false}
                   tickLine={false}
