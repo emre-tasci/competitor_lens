@@ -3,23 +3,30 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Exchange {
-  id          String   @id @default(uuid())
-  name        String
-  logoUrl     String?
-  websiteUrl  String?
-  marketType  String   // 'turkish' | 'global'
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid())
+  name            String
+  logoUrl         String?
+  websiteUrl      String?
+  twitterHandle   String?  // e.g. "binance", "btcturkpro"
+  announcementUrl String?  // URL to announcements/blog page for scraping
+  marketType      String   // 'turkish' | 'global'
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   screenshots      Screenshot[]
   exchangeFeatures ExchangeFeature[]
   updateSuggestions FeatureUpdateSuggestion[]
+  tweets           Tweet[]
+  announcements    ExchangeAnnouncement[]
+  newsArticles     NewsArticle[]
+  aiAnalyses       AIAnalysis[]
 
   @@map("exchanges")
 }
@@ -131,4 +138,94 @@ model FeatureUpdateLog {
   @@index([exchangeId])
   @@index([featureId])
   @@map("feature_update_log")
+}
+
+// ===== COMPETITIVE INTELLIGENCE MODELS =====
+
+model Tweet {
+  id             String   @id @default(uuid())
+  exchangeId     String
+  tweetId        String   @unique // Twitter/X tweet ID
+  authorHandle   String
+  authorName     String
+  content        String
+  publishedAt    DateTime
+  likeCount      Int      @default(0)
+  retweetCount   Int      @default(0)
+  replyCount     Int      @default(0)
+  viewCount      Int      @default(0)
+  mediaUrls      Json?    // array of media URLs
+  aiSummary      String?  // AI-generated summary/analysis
+  aiSentiment    String?  // "positive" | "negative" | "neutral"
+  isHighlight    Boolean  @default(false) // high engagement tweet
+  collectedAt    DateTime @default(now())
+
+  exchange Exchange @relation(fields: [exchangeId], references: [id])
+
+  @@index([exchangeId])
+  @@index([publishedAt])
+  @@index([isHighlight])
+  @@map("tweets")
+}
+
+model ExchangeAnnouncement {
+  id           String   @id @default(uuid())
+  exchangeId   String
+  title        String
+  content      String?  // scraped content
+  url          String   @unique // original announcement URL
+  imageUrl     String?
+  publishedAt  DateTime?
+  aiSummary    String?  // AI-generated summary
+  aiCategory   String?  // "listing" | "feature" | "maintenance" | "partnership" | "regulation" | "other"
+  importance   String   @default("normal") // "critical" | "high" | "normal" | "low"
+  collectedAt  DateTime @default(now())
+
+  exchange Exchange @relation(fields: [exchangeId], references: [id])
+
+  @@index([exchangeId])
+  @@index([publishedAt])
+  @@index([importance])
+  @@map("exchange_announcements")
+}
+
+model NewsArticle {
+  id           String   @id @default(uuid())
+  exchangeId   String?  // nullable - might be general crypto news
+  title        String
+  content      String?
+  url          String   @unique
+  source       String   // e.g. "CoinDesk", "CoinTelegraph"
+  imageUrl     String?
+  publishedAt  DateTime?
+  aiSummary    String?
+  aiSentiment  String?  // "positive" | "negative" | "neutral"
+  aiRelevance  Float?   // 0.0-1.0 relevance to competitive intelligence
+  tags         Json?    // array of tags
+  collectedAt  DateTime @default(now())
+
+  exchange Exchange? @relation(fields: [exchangeId], references: [id])
+
+  @@index([exchangeId])
+  @@index([publishedAt])
+  @@index([source])
+  @@map("news_articles")
+}
+
+model AIAnalysis {
+  id           String   @id @default(uuid())
+  exchangeId   String?  // nullable for industry-wide analyses
+  analysisType String   // "daily_brief" | "weekly_summary" | "competitor_alert" | "trend_analysis"
+  title        String
+  content      String   // markdown content
+  dataSources  Json?    // references to tweets/news/announcements used
+  period       String?  // e.g. "2024-01-15", "2024-W03"
+  createdAt    DateTime @default(now())
+
+  exchange Exchange? @relation(fields: [exchangeId], references: [id])
+
+  @@index([exchangeId])
+  @@index([analysisType])
+  @@index([createdAt])
+  @@map("ai_analyses")
 }

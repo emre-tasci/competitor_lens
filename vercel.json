@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/update-matrix",
       "schedule": "0 9 1 * *"
+    },
+    {
+      "path": "/api/cron/collect-intel",
+      "schedule": "0 8 * * *"
     }
   ]
 }

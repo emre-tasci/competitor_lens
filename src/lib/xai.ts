@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-function getXaiClient() {
+export function getXaiClient() {
   return new OpenAI({
     apiKey: process.env.XAI_API_KEY || "",
     baseURL: "https://api.x.ai/v1",

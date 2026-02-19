@@ -11,6 +11,10 @@ import {
   Bell,
   Search,
   Menu,
+  Twitter,
+  Megaphone,
+  Newspaper,
+  Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +32,10 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/tweets", label: "Tweet Takip", icon: Twitter },
+  { href: "/announcements", label: "Duyurular", icon: Megaphone },
+  { href: "/news", label: "Haberler", icon: Newspaper },
+  { href: "/analysis", label: "AI Analizler", icon: Brain },
   { href: "/exchanges", label: "Borsalar", icon: Building2 },
   { href: "/features", label: "Özellikler", icon: ListChecks },
   { href: "/matrix", label: "Feature Matrix", icon: Grid3X3 },
