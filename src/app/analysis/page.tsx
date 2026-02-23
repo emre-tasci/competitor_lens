@@ -51,12 +51,12 @@ const typeConfig: Record<
   daily_brief: {
     label: "Günlük Brifing",
     icon: <Calendar className="h-4 w-4" />,
-    color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    color: "bg-[#dc0005]/10 text-[#dc0005] dark:text-red-400",
   },
   weekly_summary: {
     label: "Haftalık Özet",
     icon: <FileText className="h-4 w-4" />,
-    color: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    color: "bg-[#dc0005]/20 text-[#dc0005] dark:text-red-300",
   },
   competitor_alert: {
     label: "Rakip Uyarısı",

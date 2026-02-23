@@ -30,6 +30,7 @@
     "node-html-parser": "^7.0.2",
     "openai": "^6.21.0",
     "prisma": "^5.22.0",
+    "puppeteer": "^24.37.5",
     "radix-ui": "^1.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",

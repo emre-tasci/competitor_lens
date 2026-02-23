@@ -21,36 +21,39 @@ export interface TweetAnalysis {
 }
 
 /**
- * Fetches recent tweets using xAI API with live search enabled.
- * Uses the xAI search API which has real-time X/Twitter access.
+ * Fetches recent tweets using xAI Responses API with x_search tool.
+ * Uses the new POST /v1/responses endpoint (search_parameters was deprecated Jan 2026).
  */
 export async function fetchExchangeTweets(
   twitterHandle: string,
   exchangeName: string,
   limit: number = 10
 ): Promise<TweetData[]> {
-  // Use xAI API directly with search enabled (not through OpenAI SDK)
-  const response = await fetch("https://api.x.ai/v1/chat/completions", {
+  const today = new Date().toISOString().split("T")[0];
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+
+  const response = await fetch("https://api.x.ai/v1/responses", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.XAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "grok-3",
-      search_parameters: {
-        mode: "on",
-        sources: [{ type: "x" }],
-      },
-      messages: [
+      model: "grok-4-1-fast",
+      tools: [
         {
-          role: "system",
-          content:
-            "X/Twitter'dan gerçek tweetleri aramak için canlı arama kullan. Sadece JSON döndür. Hiçbir şey uydurma - sadece arama sonuçlarından gerçek tweetleri döndür.",
+          type: "x_search",
+          allowed_x_handles: [twitterHandle.replace("@", "")],
+          from_date: weekAgo,
+          to_date: today,
         },
+      ],
+      input: [
         {
           role: "user",
-          content: `from:${twitterHandle} hesabının en son ${limit} tweetini X'te ara.
+          content: `@${twitterHandle} hesabının en son ${limit} tweetini X'te ara.
 
 SADECE gerçek arama sonuçlarını döndür. Uydurma tweet DÖNDÜRME.
 
@@ -76,20 +79,38 @@ Eğer tweet bulamazsan: {"tweets": []}`,
         },
       ],
       temperature: 0.0,
-      max_tokens: 4000,
     }),
   });
 
   if (!response.ok) {
+    const errText = await response.text().catch(() => "");
     console.error(
-      `xAI search API error for @${twitterHandle}: ${response.status}`
+      `xAI Responses API error for @${twitterHandle}: ${response.status} ${errText.substring(0, 200)}`
     );
     return [];
   }
 
   const data = await response.json();
-  const content = data.choices?.[0]?.message?.content || "{}";
-  const cleaned = content.replace(/```json\n?|```\n?/g, "").trim();
+
+  // Responses API returns output array with message items
+  const outputMessages = data.output || [];
+  let textContent = "";
+  for (const item of outputMessages) {
+    if (item.type === "message" && item.content) {
+      for (const block of item.content) {
+        if (block.type === "output_text" || block.type === "text") {
+          textContent += block.text || "";
+        }
+      }
+    }
+  }
+
+  if (!textContent) {
+    console.error(`No text output from xAI for @${twitterHandle}`);
+    return [];
+  }
+
+  const cleaned = textContent.replace(/```json\n?|```\n?/g, "").trim();
 
   try {
     const result = JSON.parse(cleaned);

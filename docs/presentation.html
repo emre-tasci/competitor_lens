@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Competitor Lens - Platform Dokumantasyonu</title>
+<style>
+  @page { margin: 0; size: A4; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #1a1a1a; line-height: 1.6; }
+
+  /* Cover Page */
+  .cover { width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; page-break-after: always; position: relative; overflow: hidden; }
+  .cover::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 8px; background: #dc0005; }
+  .cover::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 8px; background: #dc0005; }
+  .cover-logo { width: 80px; height: 80px; background: #dc0005; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+  .cover-logo svg { width: 48px; height: 48px; color: white; }
+  .cover h1 { font-size: 42px; font-weight: 800; color: #dc0005; margin-bottom: 8px; letter-spacing: -1px; }
+  .cover h2 { font-size: 20px; font-weight: 400; color: #666; margin-bottom: 48px; }
+  .cover .meta { font-size: 14px; color: #999; }
+  .cover .meta strong { color: #dc0005; }
+
+  /* Sections */
+  .page { padding: 48px 56px; page-break-after: always; min-height: 100vh; position: relative; }
+  .page::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #dc0005; }
+
+  .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid #f0f0f0; }
+  .page-number { background: #dc0005; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .page-title { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+
+  h3 { font-size: 18px; font-weight: 700; color: #dc0005; margin: 24px 0 12px 0; }
+  h4 { font-size: 15px; font-weight: 600; color: #333; margin: 16px 0 8px 0; }
+  p { font-size: 14px; color: #444; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 13px; color: #444; margin-bottom: 4px; }
+
+  /* Cards */
+  .card { background: #fafafa; border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card-title .badge { background: #dc0005; color: white; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .card p { font-size: 13px; }
+
+  /* Feature Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+  /* Mini Card */
+  .mini-card { background: white; border: 1px solid #e8e8e8; border-radius: 8px; padding: 14px; }
+  .mini-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .mini-card .value { font-size: 20px; font-weight: 700; color: #dc0005; }
+  .mini-card .desc { font-size: 12px; color: #666; margin-top: 2px; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+  th { background: #dc0005; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  tr:nth-child(even) { background: #fafafa; }
+
+  /* Flow */
+  .flow { display: flex; align-items: center; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+  .flow-item { background: #dc0005; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+  .flow-arrow { color: #dc0005; font-size: 20px; font-weight: 700; }
+
+  /* Tag */
+  .tag { display: inline-block; background: #dc0005; color: white; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; font-weight: 500; }
+  .tag.outline { background: transparent; color: #dc0005; border: 1px solid #dc0005; }
+  .tag.gray { background: #666; }
+  .tag.green { background: #16a34a; }
+
+  /* Highlight box */
+  .highlight { background: #fff5f5; border-left: 4px solid #dc0005; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  .highlight p { margin: 0; font-size: 14px; }
+
+  .footer { position: absolute; bottom: 24px; left: 56px; right: 56px; display: flex; justify-content: space-between; font-size: 11px; color: #bbb; }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER ==================== -->
+<div class="cover">
+  <div class="cover-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  </div>
+  <h1>Competitor Lens</h1>
+  <h2>Kripto Borsa Rekabet Istihbarat Platformu</h2>
+  <p class="meta"><strong>Product Ekibi</strong> icin Merkezi Rekabet Analiz Araci</p>
+  <p class="meta" style="margin-top: 24px;">Subat 2026</p>
+</div>
+
+<!-- ==================== 1. GENEL BAKIS ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">1</div>
+    <div class="page-title">Genel Bakis</div>
+  </div>
+
+  <h3>Platform Nedir?</h3>
+  <p>Competitor Lens, merkezi kripto para borsalari icin gelistirilmis bir <strong>rekabet istihbarat terminali</strong>dir. Product ekiplerinin rakip borsalarin ozelliklerini, duyurularini, sosyal medya aktivitelerini ve sektorel haberleri tek bir panelden takip etmesini saglar.</p>
+
+  <div class="highlight">
+    <p><strong>Temel Deger Onerisi:</strong> Rakiplerin ne yaptigini gercek zamanli olarak takip edin, AI destekli analizlerle stratejik kararlar alin.</p>
+  </div>
+
+  <h3>Temel Yetenekler</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Ozellik Karsilastirma</div>
+      <p>20+ borsanin 100+ ozelligini detayli olarak karsilastirin. Ekran goruntuleri ile dogrulayin.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Tweet / X Takibi</div>
+      <p>Rakip borsalarin X hesaplarini canli olarak takip edin. AI ile sentiment ve onem analizi yapin.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Haber Toplama</div>
+      <p>CoinTelegraph, The Block, CryptoSlate gibi kaynaklardan otomatik haber toplayin.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">AI Analizler</div>
+      <p>Gunluk brifing, haftalik ozet, rakip uyarilari ve trend analizleri otomatik olusturun.</p>
+    </div>
+  </div>
+
+  <h3>Hedef Kullanicilar</h3>
+  <ul>
+    <li><strong>Product Manager'lar</strong> - Rakip ozellikleri takip etmek ve yol haritasi belirlemek</li>
+    <li><strong>Business Development</strong> - Sektor trendlerini ve firsat alanlarini kesfetmek</li>
+    <li><strong>C-Level Yoneticiler</strong> - Rekabet ortamina dair guncel brifing almak</li>
+  </ul>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 1</span>
+  </div>
+</div>
+
+<!-- ==================== 2. TEKNIK MIMARI ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">2</div>
+    <div class="page-title">Teknik Mimari</div>
+  </div>
+
+  <h3>Teknoloji Yigini</h3>
+  <div class="grid-3">
+    <div class="mini-card">
+      <div class="label">Frontend</div>
+      <div class="value" style="font-size:16px">Next.js 15</div>
+      <div class="desc">React 19, App Router, Turbopack</div>
+    </div>
+    <div class="mini-card">
+      <div class="label">Stil</div>
+      <div class="value" style="font-size:16px">Tailwind 4</div>
+      <div class="desc">shadcn/ui, Radix UI</div>
+    </div>
+    <div class="mini-card">
+      <div class="label">Dil</div>
+      <div class="value" style="font-size:16px">TypeScript 5</div>
+      <div class="desc">Tam tip guvenligi</div>
+    </div>
+    <div class="mini-card">
+      <div class="label">Veritabani</div>
+      <div class="value" style="font-size:16px">PostgreSQL</div>
+      <div class="desc">Supabase, Prisma ORM</div>
+    </div>
+    <div class="mini-card">
+      <div class="label">AI Motor</div>
+      <div class="value" style="font-size:16px">xAI Grok</div>
+      <div class="desc">Grok-3, Grok-4, Vision</div>
+    </div>
+    <div class="mini-card">
+      <div class="label">Depolama</div>
+      <div class="value" style="font-size:16px">AWS S3</div>
+      <div class="desc">CloudFront CDN</div>
+    </div>
+  </div>
+
+  <h3>Veri Akisi</h3>
+  <div class="flow">
+    <div class="flow-item">X/Twitter API</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">xAI Grok</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Analiz & Siniflandirma</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">PostgreSQL</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Dashboard</div>
+  </div>
+  <div class="flow">
+    <div class="flow-item">RSS Feed'ler</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Regex Parser</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">AI Sentiment</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">PostgreSQL</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Dashboard</div>
+  </div>
+  <div class="flow">
+    <div class="flow-item">Exchange Web</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">HTML Scraper</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">AI Kategori</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">PostgreSQL</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Dashboard</div>
+  </div>
+
+  <h3>Otomasyon</h3>
+  <table>
+    <tr><th>Gorev</th><th>Siklik</th><th>Aciklama</th></tr>
+    <tr><td>Tweet Toplama</td><td>Gunluk (08:00)</td><td>Tum takip edilen borsalarin son tweetlerini toplar</td></tr>
+    <tr><td>Haber Toplama</td><td>Gunluk (08:00)</td><td>5 RSS kaynagindan haberleri ceker ve analiz eder</td></tr>
+    <tr><td>Duyuru Scraping</td><td>Gunluk (08:00)</td><td>Borsa websitelerinden duyurulari toplar</td></tr>
+    <tr><td>AI Gunluk Brifing</td><td>Gunluk (08:00)</td><td>Tum verileri analiz edip gunluk rapor olusturur</td></tr>
+    <tr><td>Feature Matrix</td><td>Aylik</td><td>AI ile ozellik matrisini gunceller</td></tr>
+  </table>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 2</span>
+  </div>
+</div>
+
+<!-- ==================== 3. DASHBOARD ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">3</div>
+    <div class="page-title">Dashboard (Ana Sayfa)</div>
+  </div>
+
+  <p>Ana sayfa, tum rekabet istihbaratini tek bir gorunumde ozetleyen <strong>Rekabet Terminali</strong> olarak tasarlanmistir.</p>
+
+  <h3>Istatistik Kartlari</h3>
+  <div class="grid-3" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="mini-card"><div class="label">Borsalar</div><div class="value">20+</div><div class="desc">TR & Global</div></div>
+    <div class="mini-card"><div class="label">Ozellikler</div><div class="value">100+</div><div class="desc">takipte</div></div>
+    <div class="mini-card"><div class="label">Tweetler</div><div class="value">62</div><div class="desc">gercek tweet</div></div>
+    <div class="mini-card"><div class="label">Haberler</div><div class="value">40</div><div class="desc">RSS'den</div></div>
+  </div>
+
+  <h3>Dashboard Bilesentleri</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="badge">KRITIK</span> Onemli Duyurular</div>
+      <p>"Critical" ve "High" onem seviyesindeki duyurular en uste sabitlenir. Kirmizi vurgu ile dikkat ceker.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">One Cikan Tweetler</div>
+      <p>AI tarafindan "highlight" olarak isaretlenen yuksek etkili tweetler. Engagement metrikleri ile birlikte gosterilir.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Son Tweetler</div>
+      <p>Son 24 saat icindeki en guncel 5 tweet. Borsa adi ve zaman bilgisi ile listelenir.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Son Duyurular</div>
+      <p>Son 7 gun icindeki borsa duyurulari. AI kategori etiketi ve ozet ile gosterilir.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Son Haberler</div>
+      <p>RSS feed'lerden toplanan sektorel haberler. Kaynak, sentiment ve AI ozeti ile listelenir.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Son AI Analiz</div>
+      <p>En son olusturulan AI analiz raporu onizlemesi. Tam analiz icin detay sayfasina yonlendirir.</p>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <p><strong>Performans:</strong> Dashboard, ISR (Incremental Static Regeneration) ile 60 saniyelik cache kullanir. Hizli yuklenme, guncel veri.</p>
+  </div>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 3</span>
+  </div>
+</div>
+
+<!-- ==================== 4. TWEET TAKIP ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">4</div>
+    <div class="page-title">Tweet Takip Sayfasi</div>
+  </div>
+
+  <p>Rakip borsalarin resmi X/Twitter hesaplarindaki paylasimlarini gercek zamanli olarak takip eder ve AI ile analiz eder.</p>
+
+  <h3>Veri Kaynagi</h3>
+  <div class="card">
+    <div class="card-title">xAI Responses API + x_search</div>
+    <p>xAI'nin <code>grok-4-1-fast</code> modeli ve <code>x_search</code> araci kullanilarak gercek tweet verileri X platformundan cekilir. Her borsanin resmi hesabi <code>allowed_x_handles</code> filtresi ile hedeflenir.</p>
+  </div>
+
+  <h3>Ozellikler</h3>
+  <table>
+    <tr><th>Ozellik</th><th>Aciklama</th></tr>
+    <tr><td>Borsa Filtresi</td><td>Dropdown ile belirli bir borsanin tweetlerini filtreleme</td></tr>
+    <tr><td>Highlight Filtresi</td><td>Sadece AI tarafindan onemli isaretlenen tweetleri gosterme</td></tr>
+    <tr><td>Sentiment Analizi</td><td>Her tweet icin pozitif / negatif / notr duygu durumu</td></tr>
+    <tr><td>Engagement Metrikleri</td><td>Begeni, retweet, yanit ve goruntulenme sayilari</td></tr>
+    <tr><td>AI Ozeti</td><td>Her tweet icin Turkce ozet</td></tr>
+    <tr><td>Manuel Toplama</td><td>"Tweetleri Topla" butonu ile anlik veri cekme</td></tr>
+  </table>
+
+  <h3>Takip Edilen Borsalar (20 Adet)</h3>
+  <p>
+    <span class="tag">BtcTurk</span>
+    <span class="tag">Paribu</span>
+    <span class="tag">Binance</span>
+    <span class="tag">Binance TR</span>
+    <span class="tag">Bybit</span>
+    <span class="tag">OKX</span>
+    <span class="tag">Coinbase</span>
+    <span class="tag">KuCoin</span>
+    <span class="tag">Gate.io</span>
+    <span class="tag">MEXC</span>
+    <span class="tag">Crypto.com</span>
+    <span class="tag">Icrypex</span>
+    <span class="tag">CoinTR</span>
+    <span class="tag">Bitget</span>
+    <span class="tag">Bitci</span>
+    <span class="tag">Bitay</span>
+    <span class="tag">Felans</span>
+    ve daha fazlasi...
+  </p>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 4</span>
+  </div>
+</div>
+
+<!-- ==================== 5. DUYURULAR ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">5</div>
+    <div class="page-title">Duyurular Sayfasi</div>
+  </div>
+
+  <p>Rakip borsalarin resmi websitelerinden ve API'lerinden gercek duyurulari toplar, kategorize eder ve onem derecesine gore siralar.</p>
+
+  <h3>Veri Kaynaklari</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Binance API</div>
+      <p>Binance'in public CMS API'si uzerinden duyurular JSON formatinda cekilir. En guvenilir kaynak.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">HTML Scraping</div>
+      <p>Diger borsalarin blog/duyuru sayfalarindan <code>node-html-parser</code> ile icerik cikarilir, Grok ile yapilandirilir.</p>
+    </div>
+  </div>
+
+  <h3>AI Kategorizasyonu</h3>
+  <p>Her duyuru otomatik olarak kategorize edilir:</p>
+  <p>
+    <span class="tag">listing</span>
+    <span class="tag">feature</span>
+    <span class="tag">maintenance</span>
+    <span class="tag">partnership</span>
+    <span class="tag">regulation</span>
+    <span class="tag">campaign</span>
+    <span class="tag gray">other</span>
+  </p>
+
+  <h3>Onem Seviyeleri</h3>
+  <table>
+    <tr><th>Seviye</th><th>Aciklama</th><th>Gosterim</th></tr>
+    <tr><td><strong style="color:#dc0005">Kritik</strong></td><td>Buyuk listeleme, regulator karar, guvenlik olayları</td><td>Kirmizi vurgulu kart, dashboard'da sabit</td></tr>
+    <tr><td><strong style="color:#f97316">Yuksek</strong></td><td>Yeni ozellik, onemli ortaklik</td><td>Turuncu badge, dashboard'da gosterim</td></tr>
+    <tr><td><strong>Normal</strong></td><td>Standart duyurular</td><td>Standart kart</td></tr>
+    <tr><td><strong style="color:#888">Dusuk</strong></td><td>Bakim, kucuk guncellemeler</td><td>Soluk gosterim</td></tr>
+  </table>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 5</span>
+  </div>
+</div>
+
+<!-- ==================== 6. HABERLER ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">6</div>
+    <div class="page-title">Haberler Sayfasi</div>
+  </div>
+
+  <p>Kripto para sektorunun onde gelen haber kaynaklarindan otomatik olarak haberleri toplar, analiz eder ve ilgili borsalarla eslestirir.</p>
+
+  <h3>RSS Kaynaklari</h3>
+  <div class="grid-3">
+    <div class="mini-card"><div class="label">Kaynak 1</div><div class="value" style="font-size:14px">CoinTelegraph</div></div>
+    <div class="mini-card"><div class="label">Kaynak 2</div><div class="value" style="font-size:14px">The Block</div></div>
+    <div class="mini-card"><div class="label">Kaynak 3</div><div class="value" style="font-size:14px">CryptoSlate</div></div>
+    <div class="mini-card"><div class="label">Kaynak 4</div><div class="value" style="font-size:14px">Decrypt</div></div>
+    <div class="mini-card"><div class="label">Kaynak 5</div><div class="value" style="font-size:14px">Bitcoin Magazine</div></div>
+    <div class="mini-card"><div class="label">Toplam</div><div class="value" style="font-size:14px">Feed Basina 15</div></div>
+  </div>
+
+  <h3>AI Analiz Katmani</h3>
+  <p>Her haber icin xAI Grok modeli ile asagidaki analizler yapilir:</p>
+  <table>
+    <tr><th>Analiz</th><th>Aciklama</th></tr>
+    <tr><td>Turkce Ozet</td><td>1-2 cumlelik otomatik ozet</td></tr>
+    <tr><td>Sentiment</td><td>Pozitif / Negatif / Notr duygu durumu</td></tr>
+    <tr><td>Ilgililik Skoru</td><td>0.0 - 1.0 arasi (merkezi borsa rekabeti icin)</td></tr>
+    <tr><td>Etiketler</td><td>listing, regulation, security, partnership, product, market vb.</td></tr>
+    <tr><td>Borsa Eslestirme</td><td>Haberde gecen borsa isimleri otomatik tespit edilir</td></tr>
+  </table>
+
+  <h3>Filtreleme</h3>
+  <ul>
+    <li><strong>Borsa Filtresi:</strong> Belirli bir borsayla ilgili haberleri gorme</li>
+    <li><strong>Sentiment Filtresi:</strong> Sadece pozitif/negatif haberleri filtreleme</li>
+    <li><strong>Yuksek Ilgililik:</strong> 0.7+ skor alan haberler badge ile vurgulanir</li>
+  </ul>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 6</span>
+  </div>
+</div>
+
+<!-- ==================== 7. AI ANALIZLER ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">7</div>
+    <div class="page-title">AI Analizler Sayfasi</div>
+  </div>
+
+  <p>Toplanan tum veriler (tweetler, duyurular, haberler) kullanilarak xAI Grok modeli ile otomatik rekabet analizleri olusturulur.</p>
+
+  <h3>Analiz Turleri</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="badge">GUNLUK</span> Gunluk Brifing</div>
+      <p>Son 24 saatin en onemli gelismeleri, dikkat edilmesi gereken noktalar ve acil aksiyon onerileri. Her sabah otomatik olusturulur.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="badge">HAFTALIK</span> Haftalik Ozet</div>
+      <p>Son 7 gunun trend analizi, rakip hareketlerinin ozeti ve gelecek hafta icin onerilere sahip detayli rapor.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="badge">UYARI</span> Rakip Uyarisi</div>
+      <p>Belirli bir rakibin onemli bir hamle yaptigi durumlarda tetiklenen odakli analiz. Acil aksiyon onerileri icerir.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="badge">TREND</span> Trend Analizi</div>
+      <p>Sektorel trendler, yeni urun kategorileri, regulasyon degisiklikleri ve pazar dinamikleri hakkinda derinlemesine analiz.</p>
+    </div>
+  </div>
+
+  <h3>Veri Kaynaklari (Analiz Basina)</h3>
+  <p>Her analiz, asagidaki verilerin tumunu birlikte degerlendirerek olusturulur:</p>
+  <div class="flow">
+    <div class="flow-item">Son Tweetler</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-item">Son Duyurular</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-item">Son Haberler</div>
+    <div class="flow-arrow">=</div>
+    <div class="flow-item" style="background:#333">AI Analiz Raporu</div>
+  </div>
+
+  <h3>Kullanim</h3>
+  <ul>
+    <li>Analiz turune tiklandiginda ilgili rapor otomatik olusturulur</li>
+    <li>Analizler genisletilebilir kartlar halinde gosterilir</li>
+    <li>Markdown formatinda zengin icerik desteklenir</li>
+    <li>Her analizde kullanilan veri kaynaklarinin sayilari gosterilir</li>
+  </ul>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 7</span>
+  </div>
+</div>
+
+<!-- ==================== 8. FEATURE MATRIX ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">8</div>
+    <div class="page-title">Ozellik Karsilastirma Modulu</div>
+  </div>
+
+  <p>Tum borsalarin sundugu ozellikleri detayli olarak karsilastirmayi saglayan uclu modul.</p>
+
+  <h3>Borsalar Sayfasi</h3>
+  <div class="card">
+    <div class="card-title">Borsa Listesi & Detay</div>
+    <p>Turkiye ve global borsalari tab yapi ile ayri listeler. Her borsa icin:</p>
+    <ul>
+      <li>Logo, isim, market tipi (Turkiye / Global)</li>
+      <li>Aktif ozellik sayisi ve toplam ozellik orani</li>
+      <li>Ekran goruntusu sayisi</li>
+      <li>Detay sayfasinda: tum ozellikler kategoriye gore gruplu, ekran goruntuleri galerisi</li>
+    </ul>
+  </div>
+
+  <h3>Ozellikler Sayfasi</h3>
+  <div class="card">
+    <div class="card-title">Ozellik Katalogu & Detay</div>
+    <p>Tum takip edilen ozellikler kategoriye gore accordion ile listelenir. Her ozellik icin:</p>
+    <ul>
+      <li>Kac borsada mevcut oldugu</li>
+      <li>Detay sayfasinda: hangi borsalarda var/yok/beta/coming soon</li>
+      <li>Borsalara ait ekran goruntuleri ile gorsel dogrulama</li>
+    </ul>
+  </div>
+
+  <h3>Feature Matrix</h3>
+  <div class="card">
+    <div class="card-title">Interaktif Karsilastirma Matrisi</div>
+    <p>Tum borsalar (satirlar) vs. tum ozellikler (sutunlar) seklinde interaktif tablo. Her hucre ozelligin durumunu gosterir:</p>
+    <p>
+      <span class="tag green">Mevcut</span>
+      <span class="tag" style="background:#dc0005">Yok</span>
+      <span class="tag" style="background:#f97316">Beta</span>
+      <span class="tag" style="background:#3b82f6">Yakin</span>
+      <span class="tag gray">Bilinmiyor</span>
+    </p>
+  </div>
+
+  <h3>Ekran Goruntusu Dogrulama</h3>
+  <div class="card">
+    <div class="card-title">AI Tabanli Screenshot Siniflandirma</div>
+    <p>S3'e yuklenen ekran goruntuleri <strong>xAI Grok Vision</strong> modeli ile otomatik olarak siniflandirilir:</p>
+    <ul>
+      <li>Hangi borsaya ait oldugu tespit edilir</li>
+      <li>Hangi ozelligin goruntusunu icerdigi belirlenir</li>
+      <li>Guven skoru hesaplanir (0-100%)</li>
+      <li>Admin panelinden manuel onay/duzeltme yapilabilir</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 8</span>
+  </div>
+</div>
+
+<!-- ==================== 9. ADMIN PANEL ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">9</div>
+    <div class="page-title">Admin Paneli & AI Onerileri</div>
+  </div>
+
+  <h3>Admin Paneli</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Excel Import</div>
+      <p>Toplu veri yuklemesi icin Excel dosyasi import edebilme. Borsalar ve ozellikler tek seferde yuklenebilir.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Borsa Yonetimi</div>
+      <p>Yeni borsa ekleme, mevcut borsalari duzenleme veya silme. Market tipi (TR/Global) secimi.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Ozellik Yonetimi</div>
+      <p>Yeni ozellik ekleme, kategoriye atama, siralama duzenleme.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Matrix Export</div>
+      <p>Feature matrix'i CSV veya JSON olarak export edebilme.</p>
+    </div>
+  </div>
+
+  <h3>AI Oneri Sistemi</h3>
+  <div class="card">
+    <div class="card-title">Otomatik Ozellik Guncelleme Onerileri</div>
+    <p>xAI Grok, ekran goruntuleri ve web verilerini analiz ederek ozellik durumlarinda degisiklik oneren bir sistem calistirir:</p>
+    <ul>
+      <li>Her oneri icin <strong>guven skoru</strong> (%) gosterilir</li>
+      <li>Eski durum &rarr; Yeni durum gecisi acikca belirtilir</li>
+      <li>AI'nin kanit metni ve kaynak URL'si sunulur</li>
+      <li>Tekli veya toplu onay/red islemleri yapilabilir</li>
+      <li>Guven esigi ile filtreleme (50%+, 70%+, 80%+, 90%+)</li>
+    </ul>
+  </div>
+
+  <h3>Oneri Is Akisi</h3>
+  <div class="flow">
+    <div class="flow-item">AI Tarama</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Oneri Olustur</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Admin Inceleme</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Onayla / Reddet</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-item">Matrix Guncelle</div>
+  </div>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 9</span>
+  </div>
+</div>
+
+<!-- ==================== 10. VERITABANI ==================== -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-number">10</div>
+    <div class="page-title">Veritabani Modeli & API'ler</div>
+  </div>
+
+  <h3>Veritabani Tabloları (12 Tablo)</h3>
+  <table>
+    <tr><th>Tablo</th><th>Aciklama</th><th>Iliski</th></tr>
+    <tr><td><strong>Exchange</strong></td><td>Borsalar (isim, logo, website, twitter, market tipi)</td><td>Tum diger tablolar</td></tr>
+    <tr><td><strong>Feature</strong></td><td>Ozellikler (isim, slug, kategori)</td><td>ExchangeFeature, Screenshot</td></tr>
+    <tr><td><strong>FeatureCategory</strong></td><td>Ozellik kategorileri</td><td>Feature</td></tr>
+    <tr><td><strong>ExchangeFeature</strong></td><td>Borsa-Ozellik durumu (available/beta/...)</td><td>Exchange, Feature</td></tr>
+    <tr><td><strong>Screenshot</strong></td><td>Ekran goruntuleri (S3 URL, AI siniflandirma)</td><td>Exchange, Feature, Category</td></tr>
+    <tr><td><strong>Tweet</strong></td><td>X/Twitter postlari (icerik, engagement, sentiment)</td><td>Exchange</td></tr>
+    <tr><td><strong>ExchangeAnnouncement</strong></td><td>Borsa duyurulari (baslik, kategori, onem)</td><td>Exchange</td></tr>
+    <tr><td><strong>NewsArticle</strong></td><td>Sektorel haberler (kaynak, sentiment, skor)</td><td>Exchange (opsiyonel)</td></tr>
+    <tr><td><strong>AIAnalysis</strong></td><td>AI analizleri (tur, icerik, veri kaynaklari)</td><td>Exchange (opsiyonel)</td></tr>
+    <tr><td><strong>FeatureUpdateSuggestion</strong></td><td>AI ozellik guncelleme onerileri</td><td>Exchange, Feature</td></tr>
+    <tr><td><strong>FeatureUpdateLog</strong></td><td>Degisiklik denetim izi</td><td>Exchange, Feature</td></tr>
+  </table>
+
+  <h3>API Endpoint'leri (24 Endpoint)</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Veri API'leri</div>
+      <ul>
+        <li>GET/POST /api/exchanges - Borsa CRUD</li>
+        <li>GET/POST /api/features - Ozellik CRUD</li>
+        <li>GET /api/matrix - Feature matrix</li>
+        <li>GET/POST /api/screenshots - Ekran goruntuleri</li>
+        <li>GET /api/search - Global arama</li>
+        <li>GET /api/stats - Dashboard istatistikleri</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Istihbarat API'leri</div>
+      <ul>
+        <li>GET/POST /api/tweets - Tweet toplama</li>
+        <li>GET/POST /api/news - Haber toplama</li>
+        <li>GET/POST /api/announcements - Duyuru scraping</li>
+        <li>GET/POST /api/analysis - AI analiz</li>
+        <li>POST /api/classify - AI siniflandirma</li>
+        <li>POST /api/cron/collect-intel - Cron job</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <p><strong>Hosting:</strong> Vercel uzerinde deploy edilmekte, Supabase PostgreSQL veritabani, AWS S3 + CloudFront CDN ile ekran goruntusu depolama.</p>
+  </div>
+
+  <div class="footer">
+    <span>Competitor Lens - Dokumantasyon</span>
+    <span>Sayfa 10</span>
+  </div>
+</div>
+
+</body>
+</html>

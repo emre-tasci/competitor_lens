@@ -93,8 +93,8 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       <div className="p-5 border-b">
         <Link href="/" className="flex items-center gap-3" onClick={onNavClick}>
-          <div className="bg-primary/10 rounded-xl p-2">
-            <Grid3X3 className="h-5 w-5 text-primary" />
+          <div className="bg-[#dc0005] rounded-xl p-2">
+            <Grid3X3 className="h-5 w-5 text-white" />
           </div>
           <span className="font-bold text-lg">Competitor Lens</span>
         </Link>
@@ -219,8 +219,8 @@ export function Navigation() {
           </SheetContent>
         </Sheet>
         <Link href="/" className="flex items-center gap-2">
-          <div className="bg-primary/10 rounded-lg p-1.5">
-            <Grid3X3 className="h-4 w-4 text-primary" />
+          <div className="bg-[#dc0005] rounded-lg p-1.5">
+            <Grid3X3 className="h-4 w-4 text-white" />
           </div>
           <span className="font-bold text-sm">Competitor Lens</span>
         </Link>

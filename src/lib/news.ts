@@ -1,4 +1,3 @@
-import { parse } from "node-html-parser";
 import { getXaiClient } from "./xai";
 import { prisma } from "./db";
 
@@ -19,12 +18,32 @@ export interface NewsAnalysis {
   tags: string[];
 }
 
+/** Extract text content from an XML tag */
+function extractTag(xml: string, tag: string): string {
+  const escaped = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = xml.match(
+    new RegExp(`<${escaped}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${escaped}>`, "i")
+  ) || xml.match(
+    new RegExp(`<${escaped}[^>]*>([\\s\\S]*?)</${escaped}>`, "i")
+  );
+  return match?.[1]?.trim() || "";
+}
+
+/** Extract an attribute from an XML tag */
+function extractAttr(xml: string, tag: string, attr: string): string {
+  const escaped = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = xml.match(
+    new RegExp(`<${escaped}[^>]*?${attr}=["']([^"']*)["']`, "i")
+  );
+  return match?.[1] || "";
+}
+
 const RSS_FEEDS = [
-  { source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/" },
   { source: "CoinTelegraph", url: "https://cointelegraph.com/rss" },
   { source: "The Block", url: "https://www.theblock.co/rss.xml" },
   { source: "CryptoSlate", url: "https://cryptoslate.com/feed/" },
   { source: "Decrypt", url: "https://decrypt.co/feed" },
+  { source: "Bitcoin Magazine", url: "https://bitcoinmagazine.com/feed" },
 ];
 
 /**
@@ -36,7 +55,12 @@ async function fetchRSSFeed(
 ): Promise<NewsData[]> {
   try {
     const response = await fetch(feedUrl, {
-      headers: { "User-Agent": "CompetitorLens/1.0" },
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "application/rss+xml, application/xml, text/xml, */*",
+      },
+      redirect: "follow",
       signal: AbortSignal.timeout(15000),
     });
 
@@ -46,48 +70,46 @@ async function fetchRSSFeed(
     }
 
     const xml = await response.text();
-    const root = parse(xml);
-
     const articles: NewsData[] = [];
 
-    // RSS uses <item>, Atom uses <entry>
-    const items = [
-      ...root.querySelectorAll("item"),
-      ...root.querySelectorAll("entry"),
-    ];
+    // Use regex to parse RSS/Atom XML (node-html-parser treats <link> as void)
+    const itemRegex = /<item[\s>]([\s\S]*?)<\/item>|<entry[\s>]([\s\S]*?)<\/entry>/gi;
+    let match;
 
-    for (const el of items) {
-      const title = el.querySelector("title")?.text?.trim() || "";
-      const linkEl = el.querySelector("link");
+    while ((match = itemRegex.exec(xml)) !== null) {
+      const block = match[1] || match[2] || "";
+
+      const title = extractTag(block, "title");
+      // <link>url</link> or <link href="url" />
       const link =
-        linkEl?.text?.trim() ||
-        linkEl?.getAttribute("href") ||
+        extractTag(block, "link") ||
+        extractAttr(block, "link", "href") ||
         "";
-      const descEl =
-        el.querySelector("description") ||
-        el.querySelector("summary") ||
-        el.querySelector("content");
-      const description = descEl?.text?.trim() || "";
-      const pubDateEl =
-        el.querySelector("pubDate") ||
-        el.querySelector("published") ||
-        el.querySelector("updated");
-      const pubDate = pubDateEl?.text?.trim() || "";
-      const mediaEl =
-        el.querySelector("media\\:content") ||
-        el.querySelector("media\\:thumbnail") ||
-        el.querySelector("enclosure");
-      const imageUrl = mediaEl?.getAttribute("url") || undefined;
+      const description =
+        extractTag(block, "description") ||
+        extractTag(block, "summary") ||
+        extractTag(block, "content:encoded") ||
+        "";
+      const pubDate =
+        extractTag(block, "pubDate") ||
+        extractTag(block, "published") ||
+        extractTag(block, "updated") ||
+        "";
+      const imageUrl =
+        extractAttr(block, "media:content", "url") ||
+        extractAttr(block, "media:thumbnail", "url") ||
+        extractAttr(block, "enclosure", "url") ||
+        undefined;
 
       if (title && link) {
-        // Strip HTML from description
         const cleanContent = description
+          .replace(/<!\[CDATA\[|\]\]>/g, "")
           .replace(/<[^>]*>/g, "")
           .substring(0, 500)
           .trim();
 
         articles.push({
-          title,
+          title: title.replace(/<!\[CDATA\[|\]\]>/g, "").trim(),
           content: cleanContent,
           url: link,
           source,

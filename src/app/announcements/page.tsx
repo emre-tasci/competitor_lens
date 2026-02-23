@@ -56,7 +56,7 @@ const importanceConfig: Record<
   },
   normal: {
     label: "Normal",
-    color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+    color: "bg-gray-200/50 text-gray-700 dark:text-gray-300 border-gray-300/30",
   },
   low: {
     label: "Düşük",
