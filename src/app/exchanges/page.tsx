@@ -9,7 +9,6 @@ const getExchanges = unstable_cache(
   async () => {
     const [allExchanges, totalFeatures] = await Promise.all([
       prisma.exchange.findMany({
-        where: { exchangeFeatures: { some: {} } },
         include: {
           _count: {
             select: {

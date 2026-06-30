@@ -4,10 +4,7 @@ import { unstable_cache } from "next/cache";
 
 const getCachedExchanges = unstable_cache(
   async (marketType: string | null) => {
-    const where = {
-      ...(marketType ? { marketType } : {}),
-      exchangeFeatures: { some: {} },
-    };
+    const where = marketType ? { marketType } : {};
 
     const [exchanges, totalFeatures] = await Promise.all([
       prisma.exchange.findMany({
