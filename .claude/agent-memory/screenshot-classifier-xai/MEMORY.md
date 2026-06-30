@@ -1,3 +1,0 @@
-- [xAI vision model & API](xai-model-and-api.md) — current working Grok vision model + endpoint to verify model lineup
-- [Classification data model](classification-data-model.md) — Prisma tables, how classification is stored, resumability filter
-- [Classify runner conventions](classify-runner.md) — how the batch runner works, folder-hint heuristic, matching
