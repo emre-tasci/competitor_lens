@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   if (format === "csv") {
     // Build CSV
     const header = [
-      "competitor name",
+      "exchange name",
       "local/global",
       ...allFeatures.map((f) => f.name),
     ];

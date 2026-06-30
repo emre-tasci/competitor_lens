@@ -58,8 +58,8 @@ const typeConfig: Record<
     icon: <FileText className="h-4 w-4" />,
     color: "bg-[#dc0005]/20 text-[#dc0005] dark:text-red-300",
   },
-  competitor_alert: {
-    label: "Rakip Uyarısı",
+  sector_alert: {
+    label: "Sektör Uyarısı",
     icon: <AlertCircle className="h-4 w-4" />,
     color: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
   },
@@ -132,7 +132,7 @@ export default function AnalysisPage() {
             AI Analizler
           </h1>
           <p className="text-muted-foreground mt-1">
-            Yapay zeka ile oluşturulan rekabet analizleri ve brifingler
+            Yapay zeka ile oluşturulan sektör analizleri ve brifingler
           </p>
         </div>
       </div>

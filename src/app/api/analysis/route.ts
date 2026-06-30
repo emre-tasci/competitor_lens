@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const validTypes: AnalysisType[] = [
       "daily_brief",
       "weekly_summary",
-      "competitor_alert",
+      "sector_alert",
       "trend_analysis",
     ];
 

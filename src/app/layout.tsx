@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Competitor Lens",
+  title: "Product Terminali",
   description: "Kripto para borsalarının özelliklerini karşılaştırma platformu",
 };
 

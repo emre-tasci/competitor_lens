@@ -155,7 +155,7 @@ export default function TweetsPage() {
             Tweet Takip
           </h1>
           <p className="text-muted-foreground mt-1">
-            Rakip borsaların X/Twitter paylaşımları ve etkileşimleri
+            Sektör borsalarının X/Twitter paylaşımları ve etkileşimleri
           </p>
         </div>
         <Button onClick={handleCollect} disabled={collecting} variant="outline">

@@ -55,7 +55,7 @@ async function scrapeBinanceAnnouncements(): Promise<ScrapedAnnouncement[]> {
     const response = await fetch(
       "https://www.binance.com/bapi/composite/v1/public/cms/article/list/query?type=1&catalogId=48&pageNo=1&pageSize=15",
       {
-        headers: { "User-Agent": "CompetitorLens/1.0" },
+        headers: { "User-Agent": "ProductTerminali/1.0" },
         signal: AbortSignal.timeout(15000),
       }
     );

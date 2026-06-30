@@ -146,9 +146,9 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="animate-fade-in-up">
-        <h1 className="text-3xl font-bold gradient-text">Rekabet Terminali</h1>
+        <h1 className="text-3xl font-bold gradient-text">Product Terminali</h1>
         <p className="text-muted-foreground mt-1">
-          Product ekibi için merkezi rekabet istihbarat paneli
+          Product ekibi için merkezi sektör istihbarat paneli
         </p>
       </div>
 
@@ -402,8 +402,8 @@ export default async function DashboardPage() {
                       ? "Günlük Brifing"
                       : data.latestAnalysis.analysisType === "weekly_summary"
                         ? "Haftalık Özet"
-                        : data.latestAnalysis.analysisType === "competitor_alert"
-                          ? "Rakip Uyarısı"
+                        : data.latestAnalysis.analysisType === "sector_alert"
+                          ? "Sektör Uyarısı"
                           : "Trend Analizi"}
                   </Badge>
                   <span className="text-sm font-medium">{data.latestAnalysis.title}</span>

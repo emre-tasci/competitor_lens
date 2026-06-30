@@ -29,24 +29,28 @@ export function parseExcelBuffer(buffer: Buffer): ParsedExcelData {
     return { rows, featureColumns: [], errors };
   }
 
+  // Accepted headers for the exchange-name column. "competitor name" is kept
+  // for backward compatibility with older spreadsheets.
+  const NAME_HEADERS = ["exchange name", "borsa adı", "competitor name"];
+
   // Get all column headers
   const headers = Object.keys(rawData[0]);
-  const nameCol = headers.find(
-    (h) => h.toLowerCase().trim() === "competitor name"
+  const nameCol = headers.find((h) =>
+    NAME_HEADERS.includes(h.toLowerCase().trim())
   );
   const typeCol = headers.find(
     (h) => h.toLowerCase().trim() === "local/global"
   );
 
   if (!nameCol) {
-    errors.push('"competitor name" sütunu bulunamadı');
+    errors.push('"exchange name" sütunu bulunamadı');
     return { rows, featureColumns: [], errors };
   }
 
   // Feature columns = all except name and type
   const featureColumns = headers.filter(
     (h) =>
-      h.toLowerCase().trim() !== "competitor name" &&
+      !NAME_HEADERS.includes(h.toLowerCase().trim()) &&
       h.toLowerCase().trim() !== "local/global"
   );
 

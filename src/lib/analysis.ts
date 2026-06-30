@@ -4,7 +4,7 @@ import { prisma } from "./db";
 export type AnalysisType =
   | "daily_brief"
   | "weekly_summary"
-  | "competitor_alert"
+  | "sector_alert"
   | "trend_analysis";
 
 /**
@@ -73,9 +73,9 @@ export async function generateAnalysis(
   const exchangeList = exchanges.map((e) => `${e.name} (${e.marketType})`).join(", ");
 
   const typePrompts: Record<AnalysisType, string> = {
-    daily_brief: `Günlük rekabet brifingi oluştur. Bugünün önemli gelişmeleri, dikkat çeken tweetler, kritik duyurular ve sektör haberleri hakkında kısa bir özet yaz.`,
-    weekly_summary: `Haftalık rekabet özeti oluştur. Bu haftanın en önemli gelişmeleri, trendler, borsa karşılaştırmaları ve stratejik öneriler hakkında kapsamlı bir analiz yaz.`,
-    competitor_alert: `Rakip uyarı raporu oluştur. Rakip borsaların önemli hamlelerine, yeni özelliklerine, ortaklıklarına veya pazar değişikliklerine odaklan. Product ekibinin dikkat etmesi gereken noktaları vurgula.`,
+    daily_brief: `Günlük sektör brifingi oluştur. Bugünün önemli gelişmeleri, dikkat çeken tweetler, kritik duyurular ve sektör haberleri hakkında kısa bir özet yaz.`,
+    weekly_summary: `Haftalık sektör özeti oluştur. Bu haftanın en önemli gelişmeleri, trendler, borsa karşılaştırmaları ve stratejik öneriler hakkında kapsamlı bir analiz yaz.`,
+    sector_alert: `Sektör uyarı raporu oluştur. Sektör borsalarının önemli hamlelerine, yeni özelliklerine, ortaklıklarına veya pazar değişikliklerine odaklan. Product ekibinin dikkat etmesi gereken noktaları vurgula.`,
     trend_analysis: `Sektör trend analizi oluştur. Merkezi kripto borsaları sektöründeki genel trendleri, ortak feature'ları, kullanıcı beklentilerini ve gelecek projeksiyonlarını analiz et.`,
   };
 
@@ -86,7 +86,7 @@ export async function generateAnalysis(
     messages: [
       {
         role: "system",
-        content: `Sen bir kripto para borsası product ekibi için çalışan kıdemli rekabet analisti ve strateji danışmanısın.
+        content: `Sen bir kripto para borsası product ekibi için çalışan kıdemli sektör analisti ve strateji danışmanısın.
 Markdown formatında detaylı, aksiyona dönüştürülebilir analizler üretiyorsun.
 Türkçe yaz. Profesyonel ama anlaşılır bir dil kullan.`,
       },
@@ -121,7 +121,7 @@ Her bölümün sonunda kısa bir "Ne yapmalıyız?" önerisi ekle.`,
   const titleMap: Record<AnalysisType, string> = {
     daily_brief: `Günlük Brifing - ${now.toLocaleDateString("tr-TR")}`,
     weekly_summary: `Haftalık Özet - ${now.toLocaleDateString("tr-TR")}`,
-    competitor_alert: `Rakip Uyarı Raporu - ${now.toLocaleDateString("tr-TR")}`,
+    sector_alert: `Sektör Uyarı Raporu - ${now.toLocaleDateString("tr-TR")}`,
     trend_analysis: `Trend Analizi - ${now.toLocaleDateString("tr-TR")}`,
   };
 

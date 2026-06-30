@@ -210,7 +210,7 @@ JSON formatında döndür:
 {
   "summary": "1-2 cümlelik Türkçe özet",
   "sentiment": "positive" | "negative" | "neutral",
-  "relevance": 0.0-1.0 (merkezi kripto borsaları rekabeti için ne kadar ilgili),
+  "relevance": 0.0-1.0 (merkezi kripto borsaları sektörü için ne kadar ilgili),
   "tags": ["listing", "regulation", "security", "partnership", "product", "market", vs.]
 }`,
       },
