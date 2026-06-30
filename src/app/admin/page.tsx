@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ExcelImporter } from "@/components/ExcelImporter";
+import { ScreenshotUploader } from "@/components/ScreenshotUploader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,12 +143,17 @@ export default function AdminPage() {
         <Tabs defaultValue="import" className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
           <TabsList>
             <TabsTrigger value="import">Excel Import</TabsTrigger>
+            <TabsTrigger value="screenshots">Ekran Görüntüleri</TabsTrigger>
             <TabsTrigger value="exchanges">Borsalar ({exchanges.length})</TabsTrigger>
             <TabsTrigger value="features">Özellikler</TabsTrigger>
           </TabsList>
 
           <TabsContent value="import" className="mt-4">
             <ExcelImporter />
+          </TabsContent>
+
+          <TabsContent value="screenshots" className="mt-4">
+            <ScreenshotUploader />
           </TabsContent>
 
           <TabsContent value="exchanges" className="mt-4 space-y-4">
