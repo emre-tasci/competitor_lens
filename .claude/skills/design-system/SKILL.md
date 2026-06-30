@@ -5,8 +5,9 @@ description: StableX "Product Terminali" design system — the Wealthsimple-insp
 
 # Product Terminali — Design System
 
-A calm, confident, fintech-grade interface for a crypto-exchange intelligence
-tool. The model is **Wealthsimple's structure and feel, rendered in StableX's
+A calm, confident, fintech-grade interface that helps a product team stay
+current with the crypto-exchange industry — tracking competitors' features,
+announcements, and news. The model is **Wealthsimple's structure and feel, rendered in StableX's
 red-accented neutral palette**. The product is dense and data-heavy, so apply
 Wealthsimple's restraint and whitespace without inflating dense tables into
 airy marketing layouts.

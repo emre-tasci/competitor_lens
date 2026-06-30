@@ -131,7 +131,7 @@ export default function AnalysisPage() {
             AI Analizler
           </h1>
           <p className="text-muted-foreground mt-1">
-            Yapay zeka ile oluşturulan sektör analizleri ve brifingler
+            Yapay zekânın sektördeki gelişmelerden çıkardığı özetler ve brifingler
           </p>
         </div>
       </div>

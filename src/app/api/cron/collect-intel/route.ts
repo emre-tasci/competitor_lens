@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
-    message: "Intelligence collection completed",
+    message: "Industry update collection completed",
     results,
     errors,
     timestamp: new Date().toISOString(),

@@ -147,7 +147,7 @@ export default function NewsPage() {
             Haberler
           </h1>
           <p className="text-muted-foreground mt-1">
-            Kripto borsa sektöründen son haberler ve gelişmeler
+            Sektörden öne çıkan haberleri ve gelişmeleri kaçırmayın
           </p>
         </div>
         <Button onClick={handleCollect} disabled={collecting} variant="outline">

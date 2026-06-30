@@ -43,7 +43,7 @@ export default async function ExchangesPage() {
     <div className="space-y-8">
       <PageHeader
         title="Borsalar"
-        description="Takip edilen kripto para borsaları ve özellik kapsam oranları."
+        description="İzlediğiniz borsalar ve sundukları özellikler — kim neyi sunuyor, bir bakışta görün."
       />
 
       <ExchangeTabs exchanges={exchanges} />

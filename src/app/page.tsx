@@ -37,7 +37,7 @@ const getDashboardData = unstable_cache(
       totalFeatures,
       pendingUpdates,
       totalCells,
-      // Intelligence data
+      // Sektör gündemi verisi
       recentTweets,
       highlightTweets,
       totalTweets,
@@ -148,8 +148,8 @@ export default async function DashboardPage() {
       {/* Header */}
       <PageHeader
         eyebrow="Product Terminali"
-        title="Sektör istihbarat paneli"
-        description="Product ekibi için kripto borsalarının özelliklerini, duyurularını ve gündemini tek ekrandan takip edin."
+        title="Sektörün nabzı, tek ekranda"
+        description="Borsaların yeni özelliklerini, duyurularını ve gündemini takip edin; ürün ekibinizi sektörde olup biten her şeyle güncel tutun."
       />
 
       {/* Quick Stats — a single quiet panel of metrics rather than 7 boxes */}

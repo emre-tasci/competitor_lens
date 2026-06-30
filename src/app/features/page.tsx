@@ -66,7 +66,7 @@ export default async function FeaturesPage() {
           </Badge>
         </div>
         <p className="text-muted-foreground mt-2">
-          Tüm borsalarda izlenen özellikler ve kapsam durumları
+          Sektörde takip ettiğiniz özellikler ve bunları sunan borsaların oranı
         </p>
       </div>
 

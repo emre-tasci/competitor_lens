@@ -164,7 +164,7 @@ export default function AnnouncementsPage() {
             Duyurular
           </h1>
           <p className="text-muted-foreground mt-1">
-            Sektör borsalarının resmi duyuruları ve güncellemeleri
+            Borsaların resmi duyurularını ve güncellemelerini tek akışta izleyin
           </p>
         </div>
         <Button onClick={handleCollect} disabled={collecting} variant="outline">

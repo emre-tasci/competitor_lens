@@ -6,7 +6,7 @@ export default function MatrixPage() {
     <div className="space-y-8">
       <PageHeader
         title="Feature Matrix"
-        description="Tüm borsa ve özelliklerin tek tabloda karşılaştırması. Hücreye dokunarak detayları görün."
+        description="Hangi borsa hangi özelliği sunuyor? Tüm sektör tek tabloda. Hücreye dokunarak durumu güncelleyin."
       />
       <FeatureMatrix />
     </div>

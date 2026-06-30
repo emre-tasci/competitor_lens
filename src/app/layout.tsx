@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Product Terminali",
-  description: "Kripto para borsalarının özelliklerini karşılaştırma platformu",
+  description: "Kripto borsa sektöründeki gelişmeleri tek ekrandan takip eden ürün ekibi paneli",
 };
 
 export default function RootLayout({
