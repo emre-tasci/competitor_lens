@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ADMIN_COOKIE, adminToken } from "@/lib/adminToken";
 
-// Protect the /admin UI and all data-mutating admin APIs with HTTP Basic Auth.
-// Set ADMIN_PASSWORD (and optionally ADMIN_USER, default "admin") in the env.
-// Public GET endpoints stay open so the public site keeps working.
+// Cookie-based auth: protects the /admin UI and data-mutating admin APIs.
+// The session cookie is set by /api/admin/login. Same-origin fetch() requests
+// from the admin pages include the cookie automatically. Set ADMIN_PASSWORD to
+// enable protection. Public GET endpoints stay open.
 
 const PROTECTED_PAGE = /^\/admin(\/|$)/;
-// Always require auth (any method):
 const ALWAYS_PROTECTED_API = [
   /^\/api\/screenshots\/sync(\/|$)/,
   /^\/api\/screenshots\/upload(\/|$)/,
 ];
-// Require auth only for mutating methods (POST/PUT/PATCH/DELETE):
 const MUTATING_PROTECTED_API = [
   /^\/api\/exchanges(\/|$)/,
   /^\/api\/features(\/|$)/,
@@ -19,16 +19,14 @@ const MUTATING_PROTECTED_API = [
   /^\/api\/updates(\/|$)/,
 ];
 
-function unauthorized() {
-  return new NextResponse("Authentication required.", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Admin", charset="UTF-8"' },
-  });
-}
-
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const method = req.method;
+
+  // Login page + login API are always reachable.
+  if (pathname === "/admin/login" || pathname === "/api/admin/login") {
+    return NextResponse.next();
+  }
 
   const isPage = PROTECTED_PAGE.test(pathname);
   const isAlwaysApi = ALWAYS_PROTECTED_API.some((r) => r.test(pathname));
@@ -41,22 +39,24 @@ export function middleware(req: NextRequest) {
   }
 
   const expected = process.env.ADMIN_PASSWORD;
-  // If no password is configured, do not lock the user out — but the admin
-  // area is then effectively open. Set ADMIN_PASSWORD to enable protection.
+  // If no password is configured, don't lock anyone out.
   if (!expected) return NextResponse.next();
 
-  const header = req.headers.get("authorization");
-  if (header?.startsWith("Basic ")) {
-    try {
-      const decoded = atob(header.slice(6));
-      const sep = decoded.indexOf(":");
-      const pass = sep >= 0 ? decoded.slice(sep + 1) : decoded;
-      if (pass === expected) return NextResponse.next();
-    } catch {
-      // fall through to 401
-    }
+  const cookie = req.cookies.get(ADMIN_COOKIE)?.value;
+  if (cookie && cookie === (await adminToken(expected))) {
+    return NextResponse.next();
   }
-  return unauthorized();
+
+  if (isPage) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/admin/login";
+    url.search = `?next=${encodeURIComponent(pathname)}`;
+    return NextResponse.redirect(url);
+  }
+  return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+    status: 401,
+    headers: { "content-type": "application/json" },
+  });
 }
 
 export const config = {

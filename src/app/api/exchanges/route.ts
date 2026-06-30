@@ -38,6 +38,33 @@ const getCachedExchanges = unstable_cache(
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const marketType = searchParams.get("marketType");
+  const all = searchParams.get("all") === "1" || searchParams.get("all") === "true";
+
+  // Admin views (?all=1): every exchange, including those with no feature data
+  // yet, and uncached so newly-added ones appear immediately.
+  if (all) {
+    const [exchanges, totalFeatures] = await Promise.all([
+      prisma.exchange.findMany({
+        where: marketType ? { marketType } : {},
+        include: {
+          _count: {
+            select: {
+              screenshots: true,
+              exchangeFeatures: { where: { hasFeature: true } },
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+      }),
+      prisma.feature.count(),
+    ]);
+    const result = exchanges.map((e) => ({
+      ...e,
+      featureCount: e._count.exchangeFeatures,
+      totalFeatures,
+    }));
+    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
+  }
 
   const result = await getCachedExchanges(marketType);
 

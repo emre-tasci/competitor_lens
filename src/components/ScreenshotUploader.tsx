@@ -50,7 +50,7 @@ export function ScreenshotUploader() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/exchanges").then((r) => r.json()),
+      fetch("/api/exchanges?all=1").then((r) => r.json()),
       fetch("/api/features").then((r) => r.json()),
     ]).then(([ex, fe]) => {
       setExchanges(Array.isArray(ex) ? ex : []);

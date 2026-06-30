@@ -47,7 +47,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/exchanges").then((r) => r.json()),
+      fetch("/api/exchanges?all=1").then((r) => r.json()),
       fetch("/api/features").then((r) => r.json()),
       fetch("/api/stats").then((r) => r.json()),
     ]).then(([exchangesData, featuresData, stats]) => {
@@ -79,6 +79,11 @@ export default function AdminPage() {
       setExchanges((prev) => [...prev, exchange]);
       setNewExchangeName("");
       setNewExchangeUrl("");
+    } else if (res.status === 401) {
+      window.location.href = "/admin/login?next=/admin";
+    } else {
+      const body = await res.json().catch(() => ({}));
+      alert(`Borsa eklenemedi: ${body.error || res.status}`);
     }
   }
 
@@ -94,6 +99,12 @@ export default function AdminPage() {
     });
     if (res.ok) {
       setNewFeatureName("");
+      alert("Özellik eklendi");
+    } else if (res.status === 401) {
+      window.location.href = "/admin/login?next=/admin";
+    } else {
+      const body = await res.json().catch(() => ({}));
+      alert(`Özellik eklenemedi: ${body.error || res.status}`);
     }
   }
 
