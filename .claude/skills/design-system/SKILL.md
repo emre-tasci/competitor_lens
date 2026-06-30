@@ -70,6 +70,42 @@ Derive variations with opacity (`bg-primary/10`, `text-primary`) or
 - Stat groups: prefer **one bordered panel with divided cells**
   (`divide-x divide-y` grid) over a row of separate cards.
 
+## 4b. Editorial primitives (v2 — the "human-crafted" layer)
+
+These opinionated utilities live in `globals.css`. Reach for them instead of
+default-shadcn card chrome so surfaces don't read as a uniform card matrix.
+
+- **`.figure`** — put on EVERY metric/count. Tabular, tightly-set numerals
+  (`tabular-nums`, `-0.025em`, `ss01`). Numbers are a design element.
+- **`.eyebrow`** — muted, wide-tracked uppercase kicker preceded by a single
+  red dot (`::before`). The recurring accent motif; replaces red title text and
+  icon-in-a-box. Exposed via `PageHeader` `eyebrow` prop.
+- **`.panel`** — the canonical surface: hairline border, `rounded-2xl`, whisper
+  shadow + a faint inset top highlight (premium, layered). Prefer over `Card`
+  for new modules. `.panel-feature` adds a barely-there red wash + tinted border
+  for the single most important module on a view.
+- **`.section-head`** — editorial section header: label row over a full-width
+  hairline rule (magazine divider, not boxed chrome).
+- **`.divide-rows`** — wrap a list; children get hairline top borders. Use for
+  feed rows instead of nesting each item in a tinted box.
+- **`.accent-edge`** — a 3px red rule pinned to a block's left edge; flags
+  alerts / featured rows. Sparing, deliberate red.
+- **`.reveal`** — staggered `fade-in-up` (smoother easing); honors reduced-motion.
+
+**Hierarchy by scale (Mercury rule).** Don't render N identical stat tiles.
+Establish a hero figure (e.g. dashboard "Kapsam" at `text-5xl/6xl`), two medium
+figures (`text-3xl`), and a compact secondary strip (`text-lg`, label-left /
+value-right). Asymmetric, intentional — not a uniform grid.
+
+**Editorial composition.** Dashboard "Gündem" uses a main column + right rail,
+each holding varied-density modules (featured `.panel-feature` analysis, paired
+feed panels, a social rail), never a flat 2-col card matrix.
+
+**PageHeader API:** `title`, `description?`, `eyebrow?`, `action?`, `meta?`,
+`size?: "default" | "display"` (display = `text-4xl→6xl`, tighter tracking, for
+the dashboard hero), `divider?`. The dashboard H1 is the bare product name
+**"Product Terminali"** (no marketing tagline) with eyebrow "Canlı · Sektör paneli".
+
 ## 5. Component patterns
 
 - **PageHeader** (`src/components/PageHeader.tsx`) — use on every top-level page.
@@ -85,8 +121,11 @@ Derive variations with opacity (`bg-primary/10`, `text-primary`) or
 - **FeatureStatusBadge** — functional status colors (var/yok/beta/yakında).
   Compact variant = 28px icon chip for the matrix.
 - **Navigation** (`Navigation.tsx`) — fixed left sidebar (desktop) / Sheet
-  (mobile). Active item = `bg-primary/10 text-primary` pill (no left-border
-  hack). Logo keeps the red box (`#dc0005`) as deliberate brand presence.
+  (mobile). Items are grouped into labelled clusters (Genel / Gündem / Ürün /
+  Yönetim) — Mercury-style tiered IA, not a flat list. Active item =
+  `bg-accent text-foreground` + a short 3px red rounded indicator pinned to the
+  rail's left edge (icon turns red); inactive hover shows the indicator at 40%.
+  Logo = red `#dc0005` box + wordmark + muted "Rakip ürün takibi" subline.
 - **Feature Matrix** (`FeatureMatrix.tsx`) — sticky header + sticky first
   column, each with a right/down shadow for depth on scroll. Category rows are
   neutral (`bg-muted`), not red. Whole rows highlight on hover.

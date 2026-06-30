@@ -19,7 +19,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -30,18 +29,37 @@ import { useEffect, useState } from "react";
 import { GlobalSearch } from "./GlobalSearch";
 import { ThemeToggle } from "./ThemeToggle";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/tweets", label: "Tweet Takip", icon: Twitter },
-  { href: "/announcements", label: "Duyurular", icon: Megaphone },
-  { href: "/news", label: "Haberler", icon: Newspaper },
-  { href: "/analysis", label: "AI Analizler", icon: Brain },
-  { href: "/exchanges", label: "Borsalar", icon: Building2 },
-  { href: "/features", label: "Özellikler", icon: ListChecks },
-  { href: "/matrix", label: "Feature Matrix", icon: Grid3X3 },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
+
+const navGroups: { label: string; items: NavItem[] }[] = [
+  {
+    label: "Genel",
+    items: [{ href: "/", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Gündem",
+    items: [
+      { href: "/tweets", label: "Tweet Takip", icon: Twitter },
+      { href: "/announcements", label: "Duyurular", icon: Megaphone },
+      { href: "/news", label: "Haberler", icon: Newspaper },
+      { href: "/analysis", label: "AI Analizler", icon: Brain },
+    ],
+  },
+  {
+    label: "Ürün",
+    items: [
+      { href: "/exchanges", label: "Borsalar", icon: Building2 },
+      { href: "/features", label: "Özellikler", icon: ListChecks },
+      { href: "/matrix", label: "Feature Matrix", icon: Grid3X3 },
+    ],
+  },
 ];
 
-const adminItems = [
+const adminItems: NavItem[] = [
   { href: "/admin", label: "Admin", icon: Settings },
 ];
 
@@ -51,7 +69,7 @@ function NavLink({
   pendingCount,
   onClick,
 }: {
-  item: { href: string; label: string; icon: React.ComponentType<{ className?: string }> };
+  item: NavItem;
   isActive: boolean;
   pendingCount?: number;
   onClick?: () => void;
@@ -60,17 +78,34 @@ function NavLink({
     <Link
       href={item.href}
       onClick={onClick}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative",
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
         isActive
-          ? "bg-primary/10 text-primary font-medium"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          ? "bg-accent text-foreground font-medium"
+          : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
       )}
     >
-      <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground/70")} />
+      {/* Distinctive active indicator: a short red rule pinned to the rail */}
+      <span
+        className={cn(
+          "absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-primary transition-all",
+          isActive ? "opacity-100" : "opacity-0 group-hover:opacity-40"
+        )}
+        aria-hidden
+      />
+      <item.icon
+        className={cn(
+          "h-4 w-4 shrink-0 transition-colors",
+          isActive ? "text-primary" : "text-muted-foreground/70 group-hover:text-foreground"
+        )}
+      />
       {item.label}
       {item.href === "/admin" && pendingCount && pendingCount > 0 ? (
-        <Badge variant="destructive" className="ml-auto text-xs h-5 min-w-5 flex items-center justify-center">
+        <Badge
+          variant="destructive"
+          className="ml-auto flex h-5 min-w-5 items-center justify-center text-xs"
+        >
           {pendingCount}
         </Badge>
       ) : null}
@@ -89,83 +124,106 @@ function SidebarContent({
   setSearchOpen: (open: boolean) => void;
   onNavClick?: () => void;
 }) {
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(href));
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-5 border-b">
-        <Link href="/" className="flex items-center gap-3" onClick={onNavClick}>
-          <div className="bg-[#dc0005] rounded-xl p-2">
-            <Grid3X3 className="h-5 w-5 text-white" />
+    <div className="flex h-full flex-col">
+      <div className="px-5 pt-6 pb-5">
+        <Link
+          href="/"
+          className="flex items-center gap-3"
+          onClick={onNavClick}
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#dc0005] shadow-sm">
+            <Grid3X3 className="h-[18px] w-[18px] text-white" />
           </div>
-          <span className="font-bold text-lg">Product Terminali</span>
+          <div className="flex flex-col leading-none">
+            <span className="text-[15px] font-bold tracking-tight">
+              Product Terminali
+            </span>
+            <span className="mt-1 text-[11px] font-medium text-muted-foreground">
+              Rakip ürün takibi
+            </span>
+          </div>
         </Link>
       </div>
 
-      <div className="p-3">
+      <div className="px-3 pb-2">
         <button
           onClick={() => setSearchOpen(true)}
-          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground rounded-lg border hover:bg-accent/50 transition-colors"
+          className="flex w-full items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground transition-colors hover:border-foreground/15 hover:bg-accent/60"
         >
           <Search className="h-4 w-4" />
-          <span>Ara...</span>
-          <kbd className="ml-auto text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
+          <span>Ara</span>
+          <kbd className="ml-auto rounded bg-background px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground shadow-xs">
             ⌘K
           </kbd>
         </button>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
-          return (
-            <NavLink
-              key={item.href}
-              item={item}
-              isActive={isActive}
-              onClick={onNavClick}
-            />
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto px-3 py-2">
+        {navGroups.map((group) => (
+          <div key={group.label} className="mb-4">
+            <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  isActive={isActive(item.href)}
+                  onClick={onNavClick}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
 
-        <Separator className="my-3" />
-
-        {adminItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          return (
-            <NavLink
-              key={item.href}
-              item={item}
-              isActive={isActive}
-              pendingCount={pendingCount}
-              onClick={onNavClick}
-            />
-          );
-        })}
-
-        {pendingCount > 0 && (
-          <Link
-            href="/admin/updates"
-            onClick={onNavClick}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ml-4",
-              pathname === "/admin/updates"
-                ? "bg-primary/10 text-primary font-medium"
-                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        <div className="mb-4">
+          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+            Yönetim
+          </p>
+          <div className="space-y-0.5">
+            {adminItems.map((item) => (
+              <NavLink
+                key={item.href}
+                item={item}
+                isActive={pathname.startsWith(item.href)}
+                pendingCount={pendingCount}
+                onClick={onNavClick}
+              />
+            ))}
+            {pendingCount > 0 && (
+              <Link
+                href="/admin/updates"
+                onClick={onNavClick}
+                aria-current={pathname === "/admin/updates" ? "page" : undefined}
+                className={cn(
+                  "group relative ml-3 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  pathname === "/admin/updates"
+                    ? "bg-accent text-foreground font-medium"
+                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                )}
+              >
+                <Bell className="h-4 w-4 shrink-0 text-muted-foreground/70" />
+                AI Öneriler
+                <Badge
+                  variant="destructive"
+                  className="ml-auto flex h-5 min-w-5 items-center justify-center text-xs"
+                >
+                  {pendingCount}
+                </Badge>
+              </Link>
             )}
-          >
-            <Bell className="h-4 w-4" />
-            AI Öneriler
-            <Badge variant="destructive" className="ml-auto text-xs h-5 min-w-5 flex items-center justify-center">
-              {pendingCount}
-            </Badge>
-          </Link>
-        )}
+          </div>
+        </div>
       </nav>
 
-      <div className="p-3 border-t">
-        <div className="flex items-center justify-between px-3 py-1">
-          <span className="text-xs text-muted-foreground">Tema</span>
+      <div className="border-t px-5 py-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Görünüm</span>
           <ThemeToggle />
         </div>
       </div>
@@ -200,7 +258,7 @@ export function Navigation() {
   return (
     <>
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 border-b bg-card/80 backdrop-blur-sm flex items-center justify-between px-4 z-40">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 border-b bg-card/80 backdrop-blur-md flex items-center justify-between px-4 z-40">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -212,17 +270,16 @@ export function Navigation() {
             <SidebarContent
               pathname={pathname}
               pendingCount={pendingCount}
-
               setSearchOpen={setSearchOpen}
               onNavClick={() => setMobileOpen(false)}
             />
           </SheetContent>
         </Sheet>
         <Link href="/" className="flex items-center gap-2">
-          <div className="bg-[#dc0005] rounded-lg p-1.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#dc0005]">
             <Grid3X3 className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold text-sm">Product Terminali</span>
+          <span className="text-sm font-bold tracking-tight">Product Terminali</span>
         </Link>
         <ThemeToggle />
       </div>

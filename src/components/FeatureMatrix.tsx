@@ -158,11 +158,12 @@ export function FeatureMatrix() {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground md:hidden">
-        Tabloyu yatay kaydırarak tüm borsaları görebilirsiniz →
+      <p className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 py-1 text-[11px] font-medium text-muted-foreground md:hidden">
+        Tüm borsalar için yana kaydırın
+        <span aria-hidden>→</span>
       </p>
 
-      <div className="border rounded-xl overflow-auto max-h-[calc(100vh-200px)] bg-card">
+      <div className="border border-border rounded-2xl overflow-auto max-h-[calc(100vh-200px)] bg-card shadow-xs">
         <table className="w-full text-sm border-separate border-spacing-0">
           <thead className="sticky top-0 z-20">
             <tr>

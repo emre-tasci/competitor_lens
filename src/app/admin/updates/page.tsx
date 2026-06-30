@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { UpdateSuggestionCard } from "@/components/UpdateSuggestionCard";
+import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -137,15 +138,11 @@ export default function UpdatesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="animate-fade-in-up">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          AI Güncelleme Önerileri
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Yapay zeka tarafından önerilen durum güncellemelerini inceleyin
-        </p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="AI Güncelleme Önerileri"
+        description="Yapay zeka tarafından önerilen durum güncellemelerini inceleyin"
+      />
 
       <Tabs value={tab} onValueChange={setTab} className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">

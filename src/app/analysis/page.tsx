@@ -24,6 +24,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/PageHeader";
 
 interface Analysis {
   id: string;
@@ -123,18 +124,12 @@ export default function AnalysisPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            AI Analizler
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Yapay zekânın sektördeki gelişmelerden çıkardığı özetler ve brifingler
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="AI Analizler"
+        description="Yapay zekânın sektördeki gelişmelerden çıkardığı özetler ve brifingler"
+      />
 
       {/* Generate buttons */}
       <div
@@ -178,7 +173,7 @@ export default function AnalysisPage() {
           </SelectContent>
         </Select>
 
-        <Badge variant="secondary" className="ml-auto self-center">
+        <Badge variant="secondary" className="figure ml-auto self-center">
           {total} analiz
         </Badge>
       </div>
@@ -237,13 +232,13 @@ export default function AnalysisPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       {analysis.dataSources && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="figure text-xs text-muted-foreground">
                           {analysis.dataSources.tweetCount || 0} tweet ·{" "}
                           {analysis.dataSources.announcementCount || 0} duyuru ·{" "}
                           {analysis.dataSources.newsCount || 0} haber
                         </span>
                       )}
-                      <span className="text-xs text-muted-foreground">
+                      <span className="figure text-xs text-muted-foreground">
                         {new Date(analysis.createdAt).toLocaleDateString("tr-TR")}
                       </span>
                       {isExpanded ? (

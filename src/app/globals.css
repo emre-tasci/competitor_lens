@@ -150,6 +150,9 @@
     @apply tracking-tight text-foreground;
     text-wrap: balance;
   }
+  h1 {
+    letter-spacing: -0.025em;
+  }
   ::selection {
     background-color: color-mix(in oklch, var(--primary) 18%, transparent);
   }
@@ -222,6 +225,99 @@
   transform: translateY(-2px);
 }
 
+/* ========================================================================
+   Design language v2 — editorial fintech (Wealthsimple/Mercury structure,
+   StableX red as the single accent). Opinionated primitives so surfaces stop
+   reading as default-shadcn card grids.
+   ===================================================================== */
+
+/* Tabular, tightly-set numerals for every metric/figure on the product. */
+.figure {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  font-feature-settings: "tnum", "ss01";
+}
+
+/* Eyebrow / kicker — a muted, wide-tracked label preceded by a single red
+   dot. The recurring accent motif replaces red text + icon-in-a-box. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.eyebrow::before {
+  content: "";
+  inline-size: 0.375rem;
+  block-size: 0.375rem;
+  border-radius: 9999px;
+  background: var(--primary);
+  flex: none;
+}
+
+/* Editorial section header: label sits above a hairline rule that runs the
+   full width — a calm, magazine-style divider instead of boxed card chrome. */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Panel — the canonical surface. Crisper than a default card: a hairline
+   border, a whisper drop shadow, and (light mode) a faint inset top highlight
+   that gives a premium, layered feel. */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.04),
+    inset 0 1px 0 oklch(1 0 0 / 0.5);
+}
+.dark .panel {
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.25);
+}
+
+/* A featured panel reads warmer — a barely-there red wash + tinted border so
+   the single most important module on a view stands apart without shouting. */
+.panel-feature {
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--primary) 4%, var(--card)), var(--card) 38%);
+  border-color: color-mix(in oklch, var(--primary) 16%, var(--border));
+}
+
+/* Thin red rule used to flag/anchor a block (critical alerts, featured rows). */
+.accent-edge {
+  position: relative;
+}
+.accent-edge::before {
+  content: "";
+  position: absolute;
+  inset-block: 0.125rem;
+  inset-inline-start: 0;
+  inline-size: 3px;
+  border-radius: 9999px;
+  background: var(--primary);
+}
+
+/* Divided list — feed rows separated by hairlines and air, never boxed. */
+.divide-rows > * + * {
+  border-top: 1px solid var(--border);
+}
+
+/* Staggered reveal helper (uses existing fade-in-up keyframes). */
+.reveal {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Retained class name for compatibility — now renders the WS-style near-black
    confident page title instead of a red one. Red is reserved as an accent. */
 .gradient-text {
@@ -232,7 +328,8 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in-up,
   .animate-scale-in,
-  .animate-slide-in-left {
+  .animate-slide-in-left,
+  .reveal {
     animation: none !important;
   }
   .card-hover {

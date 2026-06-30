@@ -15,7 +15,6 @@ import {
   Newspaper,
   ExternalLink,
   RefreshCw,
-  Sparkles,
   Loader2,
   Clock,
   TrendingUp,
@@ -23,6 +22,7 @@ import {
   Minus,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/PageHeader";
 
 interface NewsArticle {
   id: string;
@@ -139,26 +139,22 @@ export default function NewsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Haberler
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Sektörden öne çıkan haberleri ve gelişmeleri kaçırmayın
-          </p>
-        </div>
-        <Button onClick={handleCollect} disabled={collecting} variant="outline">
-          {collecting ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          {collecting ? "Toplanıyor..." : "Haberleri Topla"}
-        </Button>
-      </div>
+      <PageHeader
+        title="Haberler"
+        description="Sektörden öne çıkan haberleri ve gelişmeleri kaçırmayın"
+        action={
+          <Button onClick={handleCollect} disabled={collecting} variant="outline">
+            {collecting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            {collecting ? "Toplanıyor..." : "Haberleri Topla"}
+          </Button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex gap-3 animate-fade-in-up" style={{ animationDelay: "80ms" }}>
@@ -188,7 +184,7 @@ export default function NewsPage() {
           </SelectContent>
         </Select>
 
-        <Badge variant="secondary" className="ml-auto self-center">
+        <Badge variant="secondary" className="figure ml-auto self-center">
           {total} haber
         </Badge>
       </div>
@@ -260,9 +256,9 @@ export default function NewsPage() {
 
                     {/* AI Summary */}
                     {article.aiSummary && (
-                      <div className="bg-muted/50 rounded-lg p-3 mb-3">
-                        <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                          <Sparkles className="h-3 w-3" /> AI Özet
+                      <div className="border-l-2 border-border pl-3 mb-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-1">
+                          AI Özet
                         </p>
                         <p className="text-sm">{article.aiSummary}</p>
                       </div>

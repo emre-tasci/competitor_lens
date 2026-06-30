@@ -18,11 +18,12 @@ import {
   MessageCircle,
   Eye,
   RefreshCw,
-  Sparkles,
+  Star,
   TrendingUp,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/PageHeader";
 
 interface Tweet {
   id: string;
@@ -146,26 +147,22 @@ export default function TweetsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Tweet Takip
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Borsaların X paylaşımlarını ve etkileşimlerini gerçek zamanlı takip edin
-          </p>
-        </div>
-        <Button onClick={handleCollect} disabled={collecting} variant="outline">
-          {collecting ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          {collecting ? "Toplanıyor..." : "Tweetleri Topla"}
-        </Button>
-      </div>
+      <PageHeader
+        title="Tweet Takip"
+        description="Borsaların X paylaşımlarını ve etkileşimlerini gerçek zamanlı takip edin"
+        action={
+          <Button onClick={handleCollect} disabled={collecting} variant="outline">
+            {collecting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            {collecting ? "Toplanıyor..." : "Tweetleri Topla"}
+          </Button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex gap-3 animate-fade-in-up" style={{ animationDelay: "80ms" }}>
@@ -192,7 +189,7 @@ export default function TweetsPage() {
           Öne Çıkanlar
         </Button>
 
-        <Badge variant="secondary" className="ml-auto self-center">
+        <Badge variant="secondary" className="figure ml-auto self-center">
           {total} tweet
         </Badge>
       </div>
@@ -244,7 +241,7 @@ export default function TweetsPage() {
                       </span>
                       {tweet.isHighlight && (
                         <Badge className="ml-1 bg-primary/10 text-primary text-xs">
-                          <Sparkles className="h-3 w-3 mr-1" />
+                          <Star className="h-3 w-3 mr-1" />
                           Öne Çıkan
                         </Badge>
                       )}
@@ -257,9 +254,9 @@ export default function TweetsPage() {
 
                     {/* AI Summary */}
                     {tweet.aiSummary && (
-                      <div className="bg-muted/50 rounded-lg p-3 mb-3">
-                        <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                          <Sparkles className="h-3 w-3" /> AI Özet
+                      <div className="border-l-2 border-border pl-3 mb-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-1">
+                          AI Özet
                         </p>
                         <p className="text-sm">{tweet.aiSummary}</p>
                       </div>
@@ -267,19 +264,19 @@ export default function TweetsPage() {
 
                     {/* Engagement stats */}
                     <div className="flex items-center gap-4 text-muted-foreground">
-                      <span className="flex items-center gap-1 text-xs">
+                      <span className="figure flex items-center gap-1 text-xs">
                         <Heart className="h-3.5 w-3.5" />
                         {formatNumber(tweet.likeCount)}
                       </span>
-                      <span className="flex items-center gap-1 text-xs">
+                      <span className="figure flex items-center gap-1 text-xs">
                         <Repeat2 className="h-3.5 w-3.5" />
                         {formatNumber(tweet.retweetCount)}
                       </span>
-                      <span className="flex items-center gap-1 text-xs">
+                      <span className="figure flex items-center gap-1 text-xs">
                         <MessageCircle className="h-3.5 w-3.5" />
                         {formatNumber(tweet.replyCount)}
                       </span>
-                      <span className="flex items-center gap-1 text-xs">
+                      <span className="figure flex items-center gap-1 text-xs">
                         <Eye className="h-3.5 w-3.5" />
                         {formatNumber(tweet.viewCount)}
                       </span>

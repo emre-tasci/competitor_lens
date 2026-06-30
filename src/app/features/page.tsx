@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { Badge } from "@/components/ui/badge";
 import { FeatureAccordion } from "@/components/FeatureAccordion";
+import { PageHeader } from "@/components/PageHeader";
 
 export const revalidate = 60;
 
@@ -55,20 +56,16 @@ export default async function FeaturesPage() {
   const { totalCount, categories } = await getFeaturesData();
 
   return (
-    <div className="space-y-6">
-      <div className="animate-fade-in-up">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Özellikler
-          </h1>
-          <Badge variant="secondary" className="text-sm px-3 py-1">
+    <div className="space-y-8">
+      <PageHeader
+        title="Özellikler"
+        description="Sektörde takip ettiğiniz özellikler ve bunları sunan borsaların oranı."
+        action={
+          <Badge variant="outline" className="figure px-3 py-1 text-sm text-muted-foreground">
             {totalCount} özellik
           </Badge>
-        </div>
-        <p className="text-muted-foreground mt-2">
-          Sektörde takip ettiğiniz özellikler ve bunları sunan borsaların oranı
-        </p>
-      </div>
+        }
+      />
 
       <FeatureAccordion categories={categories} />
     </div>

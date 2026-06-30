@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Trash2, Bell } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
 
 interface Exchange {
   id: string;
@@ -116,31 +117,25 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Admin
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Borsalar, özellikler ve veri yönetimi
-          </p>
-        </div>
-        {pendingCount > 0 && (
-          <Link href="/admin/updates">
-            <Card className="card-hover cursor-pointer border-warning/30 bg-warning/5">
-              <CardContent className="flex items-center gap-3 py-3 px-4">
-                <div className="bg-warning/10 rounded-lg p-2">
+      <PageHeader
+        title="Admin"
+        description="Borsalar, özellikler ve veri yönetimi"
+        action={
+          pendingCount > 0 ? (
+            <Link href="/admin/updates">
+              <Card className="card-hover cursor-pointer border-warning/30 bg-warning/5">
+                <CardContent className="flex items-center gap-3 py-3 px-4">
                   <Bell className="h-4 w-4 text-warning-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{pendingCount} AI önerisi</p>
-                  <p className="text-xs text-muted-foreground">Onay bekliyor</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
-      </div>
+                  <div>
+                    <p className="figure text-sm font-medium">{pendingCount} AI önerisi</p>
+                    <p className="text-xs text-muted-foreground">Onay bekliyor</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : undefined
+        }
+      />
 
       {loading ? (
         <div className="space-y-4">

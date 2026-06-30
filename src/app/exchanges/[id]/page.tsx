@@ -142,12 +142,12 @@ export default async function ExchangeDetailPage({
               { label: "Toplam Özellik", value: exchangeFeatures.length, icon: ListChecks },
               { label: "Screenshot", value: screenshots.length, icon: Camera },
             ].map((stat) => (
-              <div key={stat.label} className="p-4 sm:p-5">
+              <div key={stat.label} className="p-5 sm:p-6">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <stat.icon className="h-3.5 w-3.5" />
                   {stat.label}
                 </div>
-                <p className="text-2xl font-bold tracking-tight mt-1.5 tabular-nums">{stat.value}</p>
+                <p className="figure mt-2 text-3xl font-bold">{stat.value}</p>
               </div>
             ))}
           </div>
@@ -164,12 +164,9 @@ export default async function ExchangeDetailPage({
             ([key, { categoryName, features }]) => (
               <Card key={key}>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <div className="bg-primary/10 rounded-lg p-1">
-                      <ListChecks className="h-3.5 w-3.5 text-primary" />
-                    </div>
+                  <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                     {categoryName}
-                    <Badge variant="outline" className="text-xs ml-auto">
+                    <Badge variant="outline" className="ml-auto text-xs text-muted-foreground">
                       {features.length}
                     </Badge>
                   </CardTitle>

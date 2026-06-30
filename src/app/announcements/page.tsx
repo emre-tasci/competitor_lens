@@ -15,12 +15,12 @@ import {
   Megaphone,
   ExternalLink,
   RefreshCw,
-  Sparkles,
   AlertTriangle,
   Loader2,
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/PageHeader";
 
 interface Announcement {
   id: string;
@@ -156,26 +156,22 @@ export default function AnnouncementsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between animate-fade-in-up">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Duyurular
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Borsaların resmi duyurularını ve güncellemelerini tek akışta izleyin
-          </p>
-        </div>
-        <Button onClick={handleCollect} disabled={collecting} variant="outline">
-          {collecting ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
-          )}
-          {collecting ? "Toplanıyor..." : "Duyuruları Topla"}
-        </Button>
-      </div>
+      <PageHeader
+        title="Duyurular"
+        description="Borsaların resmi duyurularını ve güncellemelerini tek akışta izleyin"
+        action={
+          <Button onClick={handleCollect} disabled={collecting} variant="outline">
+            {collecting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            {collecting ? "Toplanıyor..." : "Duyuruları Topla"}
+          </Button>
+        }
+      />
 
       {/* Filters */}
       <div className="flex gap-3 animate-fade-in-up" style={{ animationDelay: "80ms" }}>
@@ -206,7 +202,7 @@ export default function AnnouncementsPage() {
           </SelectContent>
         </Select>
 
-        <Badge variant="secondary" className="ml-auto self-center">
+        <Badge variant="secondary" className="figure ml-auto self-center">
           {total} duyuru
         </Badge>
       </div>
@@ -274,9 +270,9 @@ export default function AnnouncementsPage() {
 
                       {/* AI Summary */}
                       {a.aiSummary && (
-                        <div className="bg-muted/50 rounded-lg p-3 mb-3">
-                          <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                            <Sparkles className="h-3 w-3" /> AI Özet
+                        <div className="border-l-2 border-border pl-3 mb-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-1">
+                            AI Özet
                           </p>
                           <p className="text-sm">{a.aiSummary}</p>
                         </div>

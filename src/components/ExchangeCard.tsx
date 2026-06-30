@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ImageIcon, CheckCircle, ArrowRight } from "lucide-react";
+import { ImageIcon, ArrowRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface ExchangeCardProps {
@@ -23,47 +22,59 @@ export const ExchangeCard = React.memo(function ExchangeCard({
   totalFeatures,
   screenshotCount,
 }: ExchangeCardProps) {
-  const coverage = totalFeatures > 0 ? Math.round((featureCount / totalFeatures) * 100) : 0;
+  const coverage =
+    totalFeatures > 0 ? Math.round((featureCount / totalFeatures) * 100) : 0;
+  const isTurkish = marketType === "turkish";
 
   return (
-    <Link href={`/exchanges/${id}`} className="block h-full">
-      <Card className="card-hover cursor-pointer group h-full">
-        <CardHeader className="pb-0">
-          <div className="flex items-start justify-between gap-3">
-            <CardTitle className="text-lg font-semibold tracking-tight group-hover:text-primary transition-colors">
+    <Link href={`/exchanges/${id}`} className="group block h-full">
+      <div className="card-hover flex h-full flex-col justify-between gap-6 rounded-2xl border border-border bg-card p-5 shadow-xs">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate text-lg font-semibold tracking-tight transition-colors group-hover:text-primary">
               {name}
-            </CardTitle>
-            <Badge variant={marketType === "turkish" ? "default" : "secondary"} className="shrink-0">
-              {marketType === "turkish" ? "TR" : "Global"}
-            </Badge>
+            </h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {isTurkish ? "Türk borsası" : "Global borsa"}
+            </p>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1.5 text-sm">
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              <span className="font-semibold tabular-nums">{featureCount}</span>
-              <span className="text-muted-foreground">/ {totalFeatures} özellik</span>
+          <Badge
+            variant="outline"
+            className="shrink-0 text-[11px] text-muted-foreground"
+          >
+            {isTurkish ? "TR" : "Global"}
+          </Badge>
+        </div>
+
+        <div>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                Kapsam
+              </p>
+              <p className="figure mt-1 text-3xl font-bold leading-none">
+                {coverage}
+                <span className="text-lg font-semibold text-muted-foreground">%</span>
+              </p>
             </div>
-            <div className="flex items-center gap-1.5 text-sm">
-              <ImageIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-semibold tabular-nums">{screenshotCount}</span>
-              <span className="text-muted-foreground">görsel</span>
-            </div>
+            <span className="figure text-xs text-muted-foreground">
+              {featureCount}/{totalFeatures} özellik
+            </span>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Kapsam</span>
-              <span className="font-semibold tabular-nums">{coverage}%</span>
-            </div>
-            <Progress value={coverage} className="h-1.5" />
-          </div>
-          <div className="flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            Detayları gör
+          <Progress value={coverage} className="mt-3 h-1.5" />
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <ImageIcon className="h-3.5 w-3.5" />
+            <span className="tabular-nums">{screenshotCount}</span> görsel
+          </span>
+          <span className="inline-flex items-center gap-1 font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+            Detay
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-          </div>
-        </CardContent>
-      </Card>
+          </span>
+        </div>
+      </div>
     </Link>
   );
 });

@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/table";
 import { FeatureStatusBadge } from "@/components/FeatureStatusBadge";
 import { GroupedScreenshotGallery } from "@/components/GroupedScreenshotGallery";
-import { ListChecks, Camera, Building2, CheckCircle } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+import { Camera, Building2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 export const revalidate = 60;
@@ -75,51 +76,29 @@ export default async function FeatureDetailPage({
 
   return (
     <div className="space-y-8">
-      {/* Hero Banner */}
-      <div className="relative rounded-2xl border bg-card overflow-hidden animate-fade-in-up">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/3 rounded-full translate-y-1/2 -translate-x-1/2" />
-        <div className="relative p-6 md:p-8">
-          <div className="flex items-center gap-4">
-            <div className="bg-primary/10 rounded-2xl p-4">
-              <ListChecks className="h-8 w-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">{feature.name}</h1>
-              <div className="flex items-center gap-2 mt-1.5">
-                <Badge variant="outline">{feature.category.name}</Badge>
-              </div>
-            </div>
-          </div>
+      {/* Hero */}
+      <PageHeader
+        eyebrow={feature.category.name}
+        title={feature.name}
+        description={feature.description || undefined}
+      />
 
-          {feature.description && (
-            <p className="text-muted-foreground mt-4 max-w-2xl">{feature.description}</p>
-          )}
-
-          {/* Mini stat cards */}
-          <div className="grid grid-cols-3 gap-3 mt-6">
-            <div className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border">
+      {/* Stat strip */}
+      <div className="rounded-2xl border bg-card shadow-xs overflow-hidden animate-fade-in-up">
+        <div className="grid grid-cols-3 divide-x divide-border">
+          {[
+            { label: "Var", value: available.length, icon: CheckCircle },
+            { label: "Toplam Borsa", value: exchangeFeatures.length, icon: Building2 },
+            { label: "Screenshot", value: featureScreenshots.length, icon: Camera },
+          ].map((stat) => (
+            <div key={stat.label} className="p-5 sm:p-6">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <CheckCircle className="h-3 w-3" />
-                Var
+                <stat.icon className="h-3.5 w-3.5" />
+                {stat.label}
               </div>
-              <p className="text-lg font-bold mt-0.5">{available.length}</p>
+              <p className="figure mt-2 text-3xl font-bold">{stat.value}</p>
             </div>
-            <div className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Building2 className="h-3 w-3" />
-                Toplam Borsa
-              </div>
-              <p className="text-lg font-bold mt-0.5">{exchangeFeatures.length}</p>
-            </div>
-            <div className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Camera className="h-3 w-3" />
-                Screenshot
-              </div>
-              <p className="text-lg font-bold mt-0.5">{featureScreenshots.length}</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 

@@ -1,11 +1,9 @@
 import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Building2,
   ListChecks,
-  TrendingUp,
   Twitter,
   Megaphone,
   Newspaper,
@@ -14,10 +12,12 @@ import {
   AlertTriangle,
   Heart,
   Repeat2,
-  ExternalLink,
+  ArrowRight,
+  ArrowUpRight,
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/PageHeader";
 
 export const revalidate = 60;
@@ -140,304 +140,381 @@ function formatNumber(n: number): string {
   return n.toString();
 }
 
+/* ---- Presentational helpers (server components) ---------------------- */
+
+function SectionPanel({
+  title,
+  icon: Icon,
+  href,
+  hrefLabel = "Tümü",
+  accent,
+  className,
+  children,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href?: string;
+  hrefLabel?: string;
+  accent?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className={cn("panel overflow-hidden", className)}>
+      <div className="flex items-center justify-between gap-3 px-5 pb-3 pt-5">
+        <h3 className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+          <Icon className={cn("h-4 w-4", accent ? "text-primary" : "text-muted-foreground")} />
+          {title}
+        </h3>
+        {href && (
+          <Link
+            href={href}
+            className="group inline-flex items-center gap-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {hrefLabel}
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        )}
+      </div>
+      <div className="px-5 pb-3">{children}</div>
+    </section>
+  );
+}
+
+function EmptyState({
+  icon: Icon,
+  message,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  message: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-2.5 py-9 text-center">
+      <div className="flex h-9 w-9 items-center justify-center rounded-full border border-dashed border-border text-muted-foreground/70">
+        <Icon className="h-4 w-4" />
+      </div>
+      <p className="text-sm text-muted-foreground">{message}</p>
+    </div>
+  );
+}
+
 export default async function DashboardPage() {
   const data = await getDashboardData();
 
+  const analysisTypeLabel = (t?: string) =>
+    t === "daily_brief"
+      ? "Günlük Brifing"
+      : t === "weekly_summary"
+        ? "Haftalık Özet"
+        : t === "sector_alert"
+          ? "Sektör Uyarısı"
+          : "Trend Analizi";
+
+  const secondaryStats = [
+    { label: "Tweet", value: data.totalTweets, icon: Twitter, href: "/tweets" },
+    { label: "Duyuru", value: data.totalAnnouncements, icon: Megaphone, href: "/announcements" },
+    { label: "Haber", value: data.totalNews, icon: Newspaper, href: "/news" },
+    { label: "Analiz", value: data.totalAnalyses, icon: Brain, href: "/analysis" },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="space-y-10 pb-4">
+      {/* Hero */}
       <PageHeader
-        eyebrow="Product Terminali"
-        title="Sektörün nabzı, tek ekranda"
-        description="Borsaların yeni özelliklerini, duyurularını ve gündemini takip edin; ürün ekibinizi sektörde olup biten her şeyle güncel tutun."
+        eyebrow="Canlı · Sektör paneli"
+        title="Product Terminali"
+        size="display"
+        description="Kripto borsa sektörünü tek ekrandan izleyin — rakiplerin yeni özellikleri, duyuruları ve gündemi bir arada."
       />
 
-      {/* Quick Stats — a single quiet panel of metrics rather than 7 boxes */}
-      <div
-        className="rounded-xl border bg-card shadow-xs overflow-hidden animate-fade-in-up"
-        style={{ animationDelay: "80ms" }}
-      >
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 divide-x divide-y xl:divide-y-0 divide-border">
-          {[
-            { label: "Borsalar", value: data.totalExchanges, sub: `${data.turkishExchanges} TR · ${data.globalExchanges} Global`, icon: Building2 },
-            { label: "Özellikler", value: data.totalFeatures, sub: "takipte", icon: ListChecks },
-            { label: "Kapsam", value: `${data.coveragePercentage}%`, sub: "matrix doluluğu", icon: TrendingUp },
-            { label: "Tweetler", value: data.totalTweets, sub: "takipte", icon: Twitter },
-            { label: "Duyurular", value: data.totalAnnouncements, sub: "kayıtlı", icon: Megaphone },
-            { label: "Haberler", value: data.totalNews, sub: "arşivde", icon: Newspaper },
-            { label: "Analizler", value: data.totalAnalyses, sub: "rapor", icon: Brain },
-          ].map((stat) => (
-            <div key={stat.label} className="p-4 sm:p-5">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <stat.icon className="h-4 w-4" />
-                <span className="text-xs font-medium">{stat.label}</span>
-              </div>
-              <p className="text-2xl font-bold tracking-tight mt-2 tabular-nums">{stat.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
+      {/* Metrics band — one panel, real hierarchy by scale (hero figure +
+          two medium figures + a compact secondary strip). */}
+      <div className="reveal panel overflow-hidden" style={{ animationDelay: "60ms" }}>
+        <div className="grid grid-cols-1 divide-y divide-border lg:grid-cols-[1.5fr_1fr_1fr] lg:divide-x lg:divide-y-0">
+          {/* Featured: matrix coverage */}
+          <div className="p-6 sm:p-7">
+            <p className="eyebrow">Matrix kapsamı</p>
+            <div className="mt-5 flex items-end gap-1">
+              <span className="figure text-5xl font-bold leading-none sm:text-6xl">
+                {data.coveragePercentage}
+              </span>
+              <span className="figure mb-1 text-2xl font-semibold text-muted-foreground">%</span>
             </div>
+            <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${data.coveragePercentage}%` }}
+              />
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Borsa × özellik matrisinin doluluk oranı
+            </p>
+          </div>
+
+          {/* Medium: exchanges */}
+          <div className="p-6 sm:p-7">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Building2 className="h-4 w-4" />
+              <span className="text-xs font-medium">Takip edilen borsa</span>
+            </div>
+            <p className="figure mt-4 text-3xl font-bold">{data.totalExchanges}</p>
+            <p className="mt-1 text-xs text-muted-foreground tabular-nums">
+              {data.turkishExchanges} Türk · {data.globalExchanges} Global
+            </p>
+          </div>
+
+          {/* Medium: features */}
+          <div className="p-6 sm:p-7">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <ListChecks className="h-4 w-4" />
+              <span className="text-xs font-medium">İzlenen özellik</span>
+            </div>
+            <p className="figure mt-4 text-3xl font-bold">{data.totalFeatures}</p>
+            <p className="mt-1 text-xs text-muted-foreground">kategori bazında</p>
+          </div>
+        </div>
+
+        {/* Secondary strip — contextual figures, label left / value right */}
+        <div className="grid grid-cols-2 divide-x divide-y divide-border border-t border-border sm:grid-cols-4 sm:divide-y-0">
+          {secondaryStats.map((s) => (
+            <Link
+              key={s.label}
+              href={s.href}
+              className="group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-accent/50"
+            >
+              <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <s.icon className="h-3.5 w-3.5" />
+                {s.label}
+              </span>
+              <span className="figure text-lg font-semibold tabular-nums">
+                {s.value}
+              </span>
+            </Link>
           ))}
         </div>
       </div>
 
-      {/* Pending Updates Alert */}
+      {/* Pending updates — slim, red-anchored action banner */}
       {data.pendingUpdates > 0 && (
-        <Link href="/admin/updates">
-          <Card className="border-warning/30 bg-warning/5 card-hover animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-            <CardContent className="flex items-center gap-3 py-3 px-4">
-              <AlertTriangle className="h-4 w-4 text-warning-foreground" />
-              <span className="text-sm font-medium">{data.pendingUpdates} AI önerisi onay bekliyor</span>
-            </CardContent>
-          </Card>
+        <Link href="/admin/updates" className="reveal block" style={{ animationDelay: "120ms" }}>
+          <div className="accent-edge card-hover flex items-center gap-3 rounded-xl border border-border bg-card py-3 pl-5 pr-4">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-primary" />
+            <span className="text-sm font-medium">
+              {data.pendingUpdates} AI önerisi onay bekliyor
+            </span>
+            <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
+          </div>
         </Link>
       )}
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Critical Announcements */}
+      {/* Gündem */}
+      <div className="reveal space-y-6" style={{ animationDelay: "160ms" }}>
+        <div className="section-head">
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-xl font-semibold tracking-tight">Gündem</h2>
+            <span className="hidden text-xs text-muted-foreground sm:inline">
+              Sektörden son hareketler
+            </span>
+          </div>
+        </div>
+
+        {/* Critical announcements — featured, red-anchored */}
         {data.criticalAnnouncements.length > 0 && (
-          <Card className="lg:col-span-2 border-red-500/20 animate-fade-in-up" style={{ animationDelay: "240ms" }}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-                Kritik / Önemli Duyurular
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <section className="panel accent-edge overflow-hidden">
+            <div className="px-5 pb-3 pt-5">
+              <h3 className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+                <AlertTriangle className="h-4 w-4 text-primary" />
+                Kritik ve önemli duyurular
+              </h3>
+            </div>
+            <div className="divide-rows px-5 pb-2">
               {data.criticalAnnouncements.map((a) => (
-                <div key={a.id} className="flex items-start gap-3 p-3 rounded-lg bg-red-500/5">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-medium">{a.exchange.name}</span>
-                      <Badge className={`text-xs ${a.importance === "critical" ? "bg-red-500/10 text-red-500" : "bg-orange-500/10 text-orange-500"}`}>
-                        {a.importance === "critical" ? "Kritik" : "Yüksek"}
-                      </Badge>
-                    </div>
-                    <p className="text-sm font-medium">{a.title}</p>
-                    {a.aiSummary && <p className="text-xs text-muted-foreground mt-1">{a.aiSummary}</p>}
+                <div key={a.id} className="py-3">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="text-xs font-medium">{a.exchange.name}</span>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "h-5 text-[10px]",
+                        a.importance === "critical"
+                          ? "border-primary/30 bg-primary/10 text-primary"
+                          : "border-warning/30 bg-warning/10 text-warning-foreground"
+                      )}
+                    >
+                      {a.importance === "critical" ? "Kritik" : "Yüksek"}
+                    </Badge>
                   </div>
+                  <p className="text-sm font-medium leading-snug">{a.title}</p>
+                  {a.aiSummary && (
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">
+                      {a.aiSummary}
+                    </p>
+                  )}
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         )}
 
-        {/* Highlight Tweets */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "280ms" }}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Star className="h-4 w-4 text-primary" />
-                Öne Çıkan Tweetler
-              </CardTitle>
-              <Link href="/tweets" className="text-xs text-primary hover:underline">
-                Tümünü gör
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data.highlightTweets.length > 0 ? (
-              data.highlightTweets.map((t) => (
-                <div key={t.id} className="p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium">{t.exchange.name}</span>
-                    <span className="text-xs text-muted-foreground">@{t.authorHandle}</span>
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      {timeAgo(t.publishedAt)}
-                    </span>
-                  </div>
-                  <p className="text-sm line-clamp-2">{t.content}</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{formatNumber(t.likeCount)}</span>
-                    <span className="flex items-center gap-1"><Repeat2 className="h-3 w-3" />{formatNumber(t.retweetCount)}</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Henüz öne çıkan tweet yok
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent Tweets */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "320ms" }}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Twitter className="h-4 w-4" />
-                Son Tweetler
-              </CardTitle>
-              <Link href="/tweets" className="text-xs text-primary hover:underline">
-                Tümünü gör
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data.recentTweets.length > 0 ? (
-              data.recentTweets.map((t) => (
-                <div key={t.id} className="flex items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium">{t.exchange.name}</span>
-                      <span className="text-xs text-muted-foreground">{timeAgo(t.publishedAt)}</span>
-                    </div>
-                    <p className="text-sm line-clamp-2 mt-0.5">{t.content}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Son 24 saatte tweet yok
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent Announcements */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "360ms" }}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Megaphone className="h-4 w-4" />
-                Son Duyurular
-              </CardTitle>
-              <Link href="/announcements" className="text-xs text-primary hover:underline">
-                Tümünü gör
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data.recentAnnouncements.length > 0 ? (
-              data.recentAnnouncements.map((a) => (
-                <div key={a.id} className="flex items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium">{a.exchange.name}</span>
-                      {a.aiCategory && (
-                        <Badge variant="outline" className="text-xs h-4 px-1">
-                          {a.aiCategory}
-                        </Badge>
-                      )}
-                      <span className="text-xs text-muted-foreground ml-auto flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {a.publishedAt ? timeAgo(a.publishedAt) : timeAgo(a.collectedAt)}
-                      </span>
-                    </div>
-                    <p className="text-sm line-clamp-1 mt-0.5 font-medium">{a.title}</p>
-                    {a.aiSummary && (
-                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{a.aiSummary}</p>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Son bir haftada duyuru yok
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent News */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Newspaper className="h-4 w-4" />
-                Son Haberler
-              </CardTitle>
-              <Link href="/news" className="text-xs text-primary hover:underline">
-                Tümünü gör
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data.recentNews.length > 0 ? (
-              data.recentNews.map((n) => (
-                <div key={n.id} className="flex items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs h-4 px-1">
-                        {n.source}
-                      </Badge>
-                      {n.exchange && (
-                        <span className="text-xs font-medium">{n.exchange.name}</span>
-                      )}
-                      <span className="text-xs text-muted-foreground ml-auto">
-                        {n.publishedAt ? timeAgo(n.publishedAt) : timeAgo(n.collectedAt)}
-                      </span>
-                    </div>
-                    <p className="text-sm line-clamp-1 mt-0.5 font-medium">{n.title}</p>
-                    {n.aiSummary && (
-                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{n.aiSummary}</p>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Son bir haftada haber yok
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Latest AI Analysis */}
-        <Card className="lg:col-span-2 animate-fade-in-up" style={{ animationDelay: "440ms" }}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Brain className="h-4 w-4 text-primary" />
-                Son AI Analiz
-              </CardTitle>
-              <Link href="/analysis" className="text-xs text-primary hover:underline">
-                Tüm analizler
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {data.latestAnalysis ? (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary" className="text-xs">
-                    {data.latestAnalysis.analysisType === "daily_brief"
-                      ? "Günlük Brifing"
-                      : data.latestAnalysis.analysisType === "weekly_summary"
-                        ? "Haftalık Özet"
-                        : data.latestAnalysis.analysisType === "sector_alert"
-                          ? "Sektör Uyarısı"
-                          : "Trend Analizi"}
-                  </Badge>
-                  <span className="text-sm font-medium">{data.latestAnalysis.title}</span>
-                  <span className="text-xs text-muted-foreground ml-auto">
-                    {timeAgo(data.latestAnalysis.createdAt)}
-                  </span>
-                </div>
-                <div className="text-sm text-muted-foreground line-clamp-4 whitespace-pre-wrap">
-                  {data.latestAnalysis.content.replace(/[#*]/g, "").substring(0, 500)}...
-                </div>
+        {/* Editorial main column + right rail */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+          {/* Main column */}
+          <div className="space-y-6 lg:col-span-2">
+            {/* Featured: latest AI analysis */}
+            <section className="panel panel-feature overflow-hidden">
+              <div className="flex items-center justify-between gap-3 px-6 pb-3 pt-6">
+                <h3 className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+                  <Brain className="h-4 w-4 text-primary" />
+                  Son AI analiz
+                </h3>
                 <Link
                   href="/analysis"
-                  className="text-xs text-primary hover:underline flex items-center gap-1 mt-3"
+                  className="group inline-flex items-center gap-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <ExternalLink className="h-3 w-3" />
-                  Tam analizi oku
+                  Tüm analizler
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
-            ) : (
-              <div className="text-center py-6">
-                <Brain className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  Henüz AI analiz oluşturulmadı
-                </p>
-                <Link href="/analysis" className="text-xs text-primary hover:underline mt-1 inline-block">
-                  Analiz oluştur
-                </Link>
+              <div className="px-6 pb-6">
+                {data.latestAnalysis ? (
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary" className="text-[11px]">
+                        {analysisTypeLabel(data.latestAnalysis.analysisType)}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {timeAgo(data.latestAnalysis.createdAt)}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-lg font-semibold leading-snug tracking-tight text-balance">
+                      {data.latestAnalysis.title}
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground line-clamp-4">
+                      {data.latestAnalysis.content.replace(/[#*]/g, "").substring(0, 460)}…
+                    </p>
+                    <Link
+                      href="/analysis"
+                      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                    >
+                      Tam analizi oku
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                ) : (
+                  <EmptyState icon={Brain} message="Henüz AI analiz oluşturulmadı" />
+                )}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </section>
+
+            {/* Announcements + news, two compact feeds */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <SectionPanel title="Son duyurular" icon={Megaphone} href="/announcements">
+                {data.recentAnnouncements.length > 0 ? (
+                  <div className="divide-rows">
+                    {data.recentAnnouncements.map((a) => (
+                      <div key={a.id} className="py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-xs font-medium">{a.exchange.name}</span>
+                          {a.aiCategory && (
+                            <Badge variant="outline" className="h-4 px-1 text-[10px]">
+                              {a.aiCategory}
+                            </Badge>
+                          )}
+                          <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {a.publishedAt ? timeAgo(a.publishedAt) : timeAgo(a.collectedAt)}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm font-medium leading-snug line-clamp-2">{a.title}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState icon={Megaphone} message="Son bir haftada duyuru yok" />
+                )}
+              </SectionPanel>
+
+              <SectionPanel title="Son haberler" icon={Newspaper} href="/news">
+                {data.recentNews.length > 0 ? (
+                  <div className="divide-rows">
+                    {data.recentNews.map((n) => (
+                      <div key={n.id} className="py-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="h-4 px-1 text-[10px]">
+                            {n.source}
+                          </Badge>
+                          {n.exchange && (
+                            <span className="truncate text-xs font-medium">{n.exchange.name}</span>
+                          )}
+                          <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
+                            {n.publishedAt ? timeAgo(n.publishedAt) : timeAgo(n.collectedAt)}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm font-medium leading-snug line-clamp-2">{n.title}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState icon={Newspaper} message="Son bir haftada haber yok" />
+                )}
+              </SectionPanel>
+            </div>
+          </div>
+
+          {/* Right rail — social */}
+          <div className="space-y-6">
+            <SectionPanel title="Öne çıkan tweetler" icon={Star} href="/tweets" accent>
+              {data.highlightTweets.length > 0 ? (
+                <div className="divide-rows">
+                  {data.highlightTweets.map((t) => (
+                    <div key={t.id} className="py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium">{t.exchange.name}</span>
+                        <span className="truncate text-xs text-muted-foreground">@{t.authorHandle}</span>
+                        <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
+                          {timeAgo(t.publishedAt)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm leading-snug line-clamp-3">{t.content}</p>
+                      <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1 tabular-nums">
+                          <Heart className="h-3 w-3" />
+                          {formatNumber(t.likeCount)}
+                        </span>
+                        <span className="flex items-center gap-1 tabular-nums">
+                          <Repeat2 className="h-3 w-3" />
+                          {formatNumber(t.retweetCount)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState icon={Star} message="Henüz öne çıkan tweet yok" />
+              )}
+            </SectionPanel>
+
+            <SectionPanel title="Son tweetler" icon={Twitter} href="/tweets">
+              {data.recentTweets.length > 0 ? (
+                <div className="divide-rows">
+                  {data.recentTweets.map((t) => (
+                    <div key={t.id} className="py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium">{t.exchange.name}</span>
+                        <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
+                          {timeAgo(t.publishedAt)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm leading-snug line-clamp-2">{t.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState icon={Twitter} message="Son 24 saatte tweet yok" />
+              )}
+            </SectionPanel>
+          </div>
+        </div>
       </div>
     </div>
   );
