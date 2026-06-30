@@ -10,7 +10,7 @@ const getCachedMatrix = unstable_cache(
       prisma.exchange.findMany({
         where: exchangeWhere,
         orderBy: { name: "asc" },
-        select: { id: true, name: true, marketType: true, _count: { select: { exchangeFeatures: true } } },
+        select: { id: true, name: true, marketType: true },
       }),
       prisma.featureCategory.findMany({
         orderBy: { sortOrder: "asc" },
@@ -39,9 +39,7 @@ const getCachedMatrix = unstable_cache(
       }),
     ]);
 
-    const exchanges = allExchanges
-      .filter((e) => e._count.exchangeFeatures > 0)
-      .map(({ _count, ...rest }) => rest);
+    const exchanges = allExchanges;
 
     const cellMap: Record<string, Record<string, typeof cells[0]>> = {};
     for (const cell of cells) {
