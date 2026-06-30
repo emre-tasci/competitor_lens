@@ -10,7 +10,7 @@ import {
   Megaphone,
   Newspaper,
   Brain,
-  Sparkles,
+  Star,
   AlertTriangle,
   Heart,
   Repeat2,
@@ -18,6 +18,7 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/PageHeader";
 
 export const revalidate = 60;
 
@@ -143,37 +144,39 @@ export default async function DashboardPage() {
   const data = await getDashboardData();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="animate-fade-in-up">
-        <h1 className="text-3xl font-bold gradient-text">Product Terminali</h1>
-        <p className="text-muted-foreground mt-1">
-          Product ekibi için merkezi sektör istihbarat paneli
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Product Terminali"
+        title="Sektör istihbarat paneli"
+        description="Product ekibi için kripto borsalarının özelliklerini, duyurularını ve gündemini tek ekrandan takip edin."
+      />
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 animate-fade-in-up" style={{ animationDelay: "80ms" }}>
-        {[
-          { label: "Borsalar", value: data.totalExchanges, sub: `${data.turkishExchanges} TR · ${data.globalExchanges} GL`, icon: Building2 },
-          { label: "Özellikler", value: data.totalFeatures, sub: "takipte", icon: ListChecks },
-          { label: "Kapsam", value: `${data.coveragePercentage}%`, sub: "matrix", icon: TrendingUp },
-          { label: "Tweetler", value: data.totalTweets, sub: "takipte", icon: Twitter },
-          { label: "Duyurular", value: data.totalAnnouncements, sub: "kayıtlı", icon: Megaphone },
-          { label: "Haberler", value: data.totalNews, sub: "arşivde", icon: Newspaper },
-          { label: "Analizler", value: data.totalAnalyses, sub: "rapor", icon: Brain },
-        ].map((stat, i) => (
-          <Card key={stat.label} className="animate-fade-in-up" style={{ animationDelay: `${(i + 2) * 50}ms` }}>
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <stat.icon className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
+      {/* Quick Stats — a single quiet panel of metrics rather than 7 boxes */}
+      <div
+        className="rounded-xl border bg-card shadow-xs overflow-hidden animate-fade-in-up"
+        style={{ animationDelay: "80ms" }}
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 divide-x divide-y xl:divide-y-0 divide-border">
+          {[
+            { label: "Borsalar", value: data.totalExchanges, sub: `${data.turkishExchanges} TR · ${data.globalExchanges} Global`, icon: Building2 },
+            { label: "Özellikler", value: data.totalFeatures, sub: "takipte", icon: ListChecks },
+            { label: "Kapsam", value: `${data.coveragePercentage}%`, sub: "matrix doluluğu", icon: TrendingUp },
+            { label: "Tweetler", value: data.totalTweets, sub: "takipte", icon: Twitter },
+            { label: "Duyurular", value: data.totalAnnouncements, sub: "kayıtlı", icon: Megaphone },
+            { label: "Haberler", value: data.totalNews, sub: "arşivde", icon: Newspaper },
+            { label: "Analizler", value: data.totalAnalyses, sub: "rapor", icon: Brain },
+          ].map((stat) => (
+            <div key={stat.label} className="p-4 sm:p-5">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <stat.icon className="h-4 w-4" />
+                <span className="text-xs font-medium">{stat.label}</span>
               </div>
-              <p className="text-xl font-bold">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
+              <p className="text-2xl font-bold tracking-tight mt-2 tabular-nums">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Pending Updates Alert */}
@@ -223,7 +226,7 @@ export default async function DashboardPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
+                <Star className="h-4 w-4 text-primary" />
                 Öne Çıkan Tweetler
               </CardTitle>
               <Link href="/tweets" className="text-xs text-primary hover:underline">

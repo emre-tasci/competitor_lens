@@ -140,6 +140,18 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* Wealthsimple-inspired headings: confident, near-black, tightly tracked */
+  h1, h2, h3, h4 {
+    @apply tracking-tight text-foreground;
+    text-wrap: balance;
+  }
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 18%, transparent);
   }
 }
 
@@ -200,15 +212,35 @@
 }
 
 .card-hover {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s ease;
 }
 .card-hover:hover {
-  box-shadow: 0 8px 25px -5px oklch(0 0 0 / 0.1), 0 4px 10px -6px oklch(0 0 0 / 0.06);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -12px oklch(0 0 0 / 0.12);
+  border-color: color-mix(in oklch, var(--foreground) 14%, transparent);
   transform: translateY(-2px);
 }
 
+/* Retained class name for compatibility — now renders the WS-style near-black
+   confident page title instead of a red one. Red is reserved as an accent. */
 .gradient-text {
-  color: #dc0005;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-scale-in,
+  .animate-slide-in-left {
+    animation: none !important;
+  }
+  .card-hover {
+    transition: none;
+  }
+  .card-hover:hover {
+    transform: none;
+  }
 }
 
 .skeleton-shimmer {

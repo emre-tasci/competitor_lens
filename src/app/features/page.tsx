@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { Badge } from "@/components/ui/badge";
-import { ListChecks } from "lucide-react";
 import { FeatureAccordion } from "@/components/FeatureAccordion";
 
 export const revalidate = 60;
@@ -59,10 +58,7 @@ export default async function FeaturesPage() {
     <div className="space-y-6">
       <div className="animate-fade-in-up">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
-            <div className="bg-primary/10 rounded-xl p-2.5">
-              <ListChecks className="h-6 w-6 text-primary" />
-            </div>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Özellikler
           </h1>
           <Badge variant="secondary" className="text-sm px-3 py-1">

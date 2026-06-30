@@ -150,8 +150,7 @@ export default function TweetsPage() {
       {/* Header */}
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
-          <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
-            <Twitter className="h-8 w-8" />
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Tweet Takip
           </h1>
           <p className="text-muted-foreground mt-1">

@@ -158,19 +158,23 @@ export function FeatureMatrix() {
         </div>
       )}
 
-      <div className="border rounded-xl overflow-auto max-h-[calc(100vh-200px)]">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-20 bg-background">
+      <p className="text-xs text-muted-foreground md:hidden">
+        Tabloyu yatay kaydırarak tüm borsaları görebilirsiniz →
+      </p>
+
+      <div className="border rounded-xl overflow-auto max-h-[calc(100vh-200px)] bg-card">
+        <table className="w-full text-sm border-separate border-spacing-0">
+          <thead className="sticky top-0 z-20">
             <tr>
-              <th className="sticky left-0 z-30 bg-background border-b border-r p-2.5 text-left min-w-[200px]">
+              <th className="sticky left-0 z-30 bg-card border-b border-r p-3 text-left min-w-[180px] md:min-w-[220px] text-xs font-semibold text-muted-foreground uppercase tracking-wide shadow-[2px_0_4px_-2px_oklch(0_0_0/0.08)]">
                 Özellik
               </th>
               {data.exchanges.map((exchange) => (
                 <th
                   key={exchange.id}
-                  className="border-b border-r p-2.5 text-center min-w-[80px] whitespace-nowrap"
+                  className="bg-card border-b border-r last:border-r-0 p-3 text-center min-w-[76px] whitespace-nowrap"
                 >
-                  <span className="text-xs font-medium">{exchange.name}</span>
+                  <span className="text-xs font-semibold">{exchange.name}</span>
                 </th>
               ))}
             </tr>
@@ -181,15 +185,17 @@ export function FeatureMatrix() {
                 {/* Category header row */}
                 <tr
                   key={`cat-${category.id}`}
-                  className="bg-primary/5 cursor-pointer hover:bg-primary/8 transition-colors"
+                  className="cursor-pointer group/cat"
                   onClick={() => toggleCategory(category.id)}
                 >
                   <td
-                    className="sticky left-0 z-10 bg-primary/5 border-b border-r p-2.5 font-semibold text-xs"
+                    className="sticky left-0 z-10 bg-muted border-b border-r p-3 font-semibold text-xs shadow-[2px_0_4px_-2px_oklch(0_0_0/0.08)] group-hover/cat:bg-muted/80 transition-colors"
                     colSpan={1}
                   >
                     <span className="flex items-center gap-2">
-                      {collapsedCategories.has(category.id) ? "▶" : "▼"}{" "}
+                      <span className="text-muted-foreground text-[10px]">
+                        {collapsedCategories.has(category.id) ? "▶" : "▼"}
+                      </span>
                       {category.name}
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
                         {category.features.length}
@@ -199,7 +205,7 @@ export function FeatureMatrix() {
                   {data.exchanges.map((exchange) => (
                     <td
                       key={`cat-${category.id}-${exchange.id}`}
-                      className="border-b border-r p-2.5"
+                      className="border-b border-r last:border-r-0 bg-muted group-hover/cat:bg-muted/80 transition-colors"
                     />
                   ))}
                 </tr>
@@ -207,8 +213,8 @@ export function FeatureMatrix() {
                 {/* Feature rows */}
                 {!collapsedCategories.has(category.id) &&
                   category.features.map((feature) => (
-                    <tr key={feature.id} className="hover:bg-accent/30 transition-colors">
-                      <td className="sticky left-0 z-10 bg-background border-b border-r p-2.5 pl-6 text-xs">
+                    <tr key={feature.id} className="group/row">
+                      <td className="sticky left-0 z-10 bg-card border-b border-r p-3 pl-7 text-xs group-hover/row:bg-accent/40 shadow-[2px_0_4px_-2px_oklch(0_0_0/0.08)] transition-colors">
                         {feature.name}
                       </td>
                       {data.exchanges.map((exchange) => {
@@ -221,16 +227,18 @@ export function FeatureMatrix() {
                         return (
                           <td
                             key={cellKey}
-                            className={`border-b border-r p-1 text-center ${
+                            className={`border-b border-r last:border-r-0 p-1.5 text-center group-hover/row:bg-accent/40 transition-colors ${
                               editMode
-                                ? "cursor-pointer hover:bg-primary/10 transition-colors"
+                                ? "cursor-pointer hover:!bg-primary/10"
                                 : ""
                             } ${isSaving ? "opacity-50" : ""}`}
                             onClick={() =>
                               handleCellClick(exchange.id, feature.id)
                             }
                           >
-                            <FeatureStatusBadge status={status} compact />
+                            <div className="flex justify-center">
+                              <FeatureStatusBadge status={status} compact />
+                            </div>
                           </td>
                         );
                       })}

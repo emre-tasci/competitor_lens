@@ -139,10 +139,7 @@ export default function UpdatesPage() {
   return (
     <div className="space-y-6">
       <div className="animate-fade-in-up">
-        <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
-          <div className="bg-primary/10 rounded-xl p-2.5">
-            <Brain className="h-6 w-6 text-primary" />
-          </div>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
           AI Güncelleme Önerileri
         </h1>
         <p className="text-muted-foreground mt-2">

@@ -16,7 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, Bell, Settings } from "lucide-react";
+import { Plus, Trash2, Bell } from "lucide-react";
 import Link from "next/link";
 
 interface Exchange {
@@ -118,10 +118,7 @@ export default function AdminPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
-          <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
-            <div className="bg-primary/10 rounded-xl p-2.5">
-              <Settings className="h-6 w-6 text-primary" />
-            </div>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Admin
           </h1>
           <p className="text-muted-foreground mt-2">

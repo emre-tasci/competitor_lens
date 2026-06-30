@@ -61,13 +61,13 @@ function NavLink({
       href={item.href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all relative",
+        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors relative",
         isActive
-          ? "bg-primary/10 text-primary font-medium border-l-[3px] border-primary ml-0 pl-[calc(0.75rem-3px)]"
-          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+          ? "bg-primary/10 text-primary font-medium"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >
-      <item.icon className="h-4 w-4" />
+      <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground/70")} />
       {item.label}
       {item.href === "/admin" && pendingCount && pendingCount > 0 ? (
         <Badge variant="destructive" className="ml-auto text-xs h-5 min-w-5 flex items-center justify-center">

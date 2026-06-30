@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FeatureStatusBadge } from "@/components/FeatureStatusBadge";
 import { GroupedScreenshotGallery } from "@/components/GroupedScreenshotGallery";
-import { Building2, Globe, ExternalLink, Camera, CheckCircle, ListChecks } from "lucide-react";
+import { Globe, ExternalLink, Camera, CheckCircle, ListChecks, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export const revalidate = 60;
@@ -97,70 +97,59 @@ export default async function ExchangeDetailPage({
 
   return (
     <div className="space-y-8">
-      {/* Hero Banner */}
-      <div className="relative rounded-2xl border bg-card overflow-hidden animate-fade-in-up">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/3 rounded-full translate-y-1/2 -translate-x-1/2" />
-        <div className="relative p-6 md:p-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-primary/10 rounded-2xl p-4">
-                <Building2 className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold">{exchange.name}</h1>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <Badge
-                    variant={
-                      exchange.marketType === "turkish" ? "default" : "secondary"
-                    }
-                  >
-                    {exchange.marketType === "turkish" ? "Türk Borsası" : "Global Borsa"}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            {exchange.websiteUrl && (
-              <a
-                href={exchange.websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity w-fit"
-              >
-                <Globe className="h-4 w-4" />
-                Website
-                <ExternalLink className="h-3 w-3" />
-              </a>
+      {/* Breadcrumb */}
+      <Link
+        href="/exchanges"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors animate-fade-in-up"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Borsalar
+      </Link>
+
+      {/* Hero */}
+      <div className="animate-fade-in-up space-y-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-3">
+            <Badge
+              variant={exchange.marketType === "turkish" ? "default" : "secondary"}
+            >
+              {exchange.marketType === "turkish" ? "Türk Borsası" : "Global Borsa"}
+            </Badge>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{exchange.name}</h1>
+            {exchange.description && (
+              <p className="text-muted-foreground max-w-2xl leading-relaxed">{exchange.description}</p>
             )}
           </div>
-
-          {exchange.description && (
-            <p className="text-muted-foreground mt-4 max-w-2xl">{exchange.description}</p>
+          {exchange.websiteUrl && (
+            <a
+              href={exchange.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors w-fit shrink-0"
+            >
+              <Globe className="h-4 w-4" />
+              Website
+              <ExternalLink className="h-3 w-3" />
+            </a>
           )}
+        </div>
 
-          {/* Mini stat cards */}
-          <div className="grid grid-cols-3 gap-3 mt-6">
-            <div className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <CheckCircle className="h-3 w-3" />
-                Aktif Özellikler
+        {/* Stat strip */}
+        <div className="rounded-xl border bg-card shadow-xs overflow-hidden">
+          <div className="grid grid-cols-3 divide-x divide-border">
+            {[
+              { label: "Aktif Özellikler", value: availableCount, icon: CheckCircle },
+              { label: "Toplam Özellik", value: exchangeFeatures.length, icon: ListChecks },
+              { label: "Screenshot", value: screenshots.length, icon: Camera },
+            ].map((stat) => (
+              <div key={stat.label} className="p-4 sm:p-5">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <stat.icon className="h-3.5 w-3.5" />
+                  {stat.label}
+                </div>
+                <p className="text-2xl font-bold tracking-tight mt-1.5 tabular-nums">{stat.value}</p>
               </div>
-              <p className="text-lg font-bold mt-0.5">{availableCount}</p>
-            </div>
-            <div className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <ListChecks className="h-3 w-3" />
-                Toplam Özellik
-              </div>
-              <p className="text-lg font-bold mt-0.5">{exchangeFeatures.length}</p>
-            </div>
-            <div className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Camera className="h-3 w-3" />
-                Screenshot
-              </div>
-              <p className="text-lg font-bold mt-0.5">{screenshots.length}</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
