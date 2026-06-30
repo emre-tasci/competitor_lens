@@ -21,7 +21,7 @@ const getFeaturesData = unstable_cache(
         },
         orderBy: [{ category: { sortOrder: "asc" } }, { sortOrder: "asc" }],
       }),
-      prisma.exchange.count({ where: { exchangeFeatures: { some: {} } } }),
+      prisma.exchange.count(),
     ]);
 
     // Group by category

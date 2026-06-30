@@ -37,6 +37,7 @@ const getDashboardData = unstable_cache(
       totalFeatures,
       pendingUpdates,
       totalCells,
+      exchangesWithData,
       // Sektör gündemi verisi
       recentTweets,
       highlightTweets,
@@ -49,12 +50,13 @@ const getDashboardData = unstable_cache(
       latestAnalysis,
       totalAnalyses,
     ] = await Promise.all([
-      prisma.exchange.count({ where: hasFeatureData }),
-      prisma.exchange.count({ where: { marketType: "turkish", ...hasFeatureData } }),
-      prisma.exchange.count({ where: { marketType: "global", ...hasFeatureData } }),
+      prisma.exchange.count(),
+      prisma.exchange.count({ where: { marketType: "turkish" } }),
+      prisma.exchange.count({ where: { marketType: "global" } }),
       prisma.feature.count(),
       prisma.featureUpdateSuggestion.count({ where: { status: "pending" } }),
       prisma.exchangeFeature.count(),
+      prisma.exchange.count({ where: hasFeatureData }),
       // Recent tweets (last 24h)
       prisma.tweet.findMany({
         where: { collectedAt: { gte: oneDayAgo } },
@@ -98,7 +100,7 @@ const getDashboardData = unstable_cache(
       prisma.aIAnalysis.count(),
     ]);
 
-    const maxCells = totalExchanges * totalFeatures;
+    const maxCells = exchangesWithData * totalFeatures;
     const coveragePercentage = maxCells > 0 ? Math.round((totalCells / maxCells) * 100) : 0;
 
     return {

@@ -16,19 +16,21 @@ const getCachedStats = unstable_cache(
       pendingUpdates,
       totalCells,
       availableCells,
+      exchangesWithData,
     ] = await Promise.all([
-      prisma.exchange.count({ where: hasFeatureData }),
-      prisma.exchange.count({ where: { marketType: "turkish", ...hasFeatureData } }),
-      prisma.exchange.count({ where: { marketType: "global", ...hasFeatureData } }),
+      prisma.exchange.count(),
+      prisma.exchange.count({ where: { marketType: "turkish" } }),
+      prisma.exchange.count({ where: { marketType: "global" } }),
       prisma.feature.count(),
       prisma.screenshot.count(),
       prisma.screenshot.count({ where: { featureId: { not: null } } }),
       prisma.featureUpdateSuggestion.count({ where: { status: "pending" } }),
       prisma.exchangeFeature.count(),
       prisma.exchangeFeature.count({ where: { hasFeature: true } }),
+      prisma.exchange.count({ where: hasFeatureData }),
     ]);
 
-    const maxCells = totalExchanges * totalFeatures;
+    const maxCells = exchangesWithData * totalFeatures;
     const coveragePercentage = maxCells > 0
       ? Math.round((totalCells / maxCells) * 100)
       : 0;

@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 
-const hasFeatureData = { exchangeFeatures: { some: {} } };
-
 const getCachedCharts = unstable_cache(
   async () => {
     const [exchanges, totalFeatures, categories, allFeatures] =
       await Promise.all([
         prisma.exchange.findMany({
-          where: hasFeatureData,
           include: {
             _count: {
               select: { exchangeFeatures: { where: { hasFeature: true } } },
