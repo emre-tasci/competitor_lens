@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Building2,
   ListChecks,
+  Grid3X3,
   Twitter,
   Megaphone,
   Newspaper,
@@ -49,6 +50,9 @@ const getDashboardData = unstable_cache(
       totalNews,
       latestAnalysis,
       totalAnalyses,
+      tweets24h,
+      announcements24h,
+      news24h,
     ] = await Promise.all([
       prisma.exchange.count(),
       prisma.exchange.count({ where: { marketType: "turkish" } }),
@@ -98,10 +102,15 @@ const getDashboardData = unstable_cache(
         orderBy: { createdAt: "desc" },
       }),
       prisma.aIAnalysis.count(),
+      // Freshness — new activity in the last 24h (the "what changed" signal)
+      prisma.tweet.count({ where: { collectedAt: { gte: oneDayAgo } } }),
+      prisma.exchangeAnnouncement.count({ where: { collectedAt: { gte: oneDayAgo } } }),
+      prisma.newsArticle.count({ where: { collectedAt: { gte: oneDayAgo } } }),
     ]);
 
     const maxCells = exchangesWithData * totalFeatures;
     const coveragePercentage = maxCells > 0 ? Math.round((totalCells / maxCells) * 100) : 0;
+    const todaySignals = tweets24h + announcements24h + news24h;
 
     return {
       totalExchanges,
@@ -120,6 +129,10 @@ const getDashboardData = unstable_cache(
       totalNews,
       latestAnalysis,
       totalAnalyses,
+      tweets24h,
+      announcements24h,
+      news24h,
+      todaySignals,
     };
   },
   ["terminal-dashboard"],
@@ -213,10 +226,10 @@ export default async function DashboardPage() {
           : "Trend Analizi";
 
   const secondaryStats = [
-    { label: "Tweet", value: data.totalTweets, icon: Twitter, href: "/tweets" },
-    { label: "Duyuru", value: data.totalAnnouncements, icon: Megaphone, href: "/announcements" },
-    { label: "Haber", value: data.totalNews, icon: Newspaper, href: "/news" },
-    { label: "Analiz", value: data.totalAnalyses, icon: Brain, href: "/analysis" },
+    { label: "Tweet", value: data.totalTweets, delta: data.tweets24h, icon: Twitter, href: "/tweets" },
+    { label: "Duyuru", value: data.totalAnnouncements, delta: data.announcements24h, icon: Megaphone, href: "/announcements" },
+    { label: "Haber", value: data.totalNews, delta: data.news24h, icon: Newspaper, href: "/news" },
+    { label: "Analiz", value: data.totalAnalyses, delta: 0, icon: Brain, href: "/analysis" },
   ];
 
   return (
@@ -232,25 +245,36 @@ export default async function DashboardPage() {
       {/* Metrics band — one panel, real hierarchy by scale (hero figure +
           two medium figures + a compact secondary strip). */}
       <div className="reveal panel overflow-hidden" style={{ animationDelay: "60ms" }}>
-        <div className="grid grid-cols-1 divide-y divide-border lg:grid-cols-[1.5fr_1fr_1fr] lg:divide-x lg:divide-y-0">
-          {/* Featured: matrix coverage */}
+        <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:divide-x lg:divide-y-0">
+          {/* Featured: last-24h activity — the "what changed" signal */}
           <div className="p-6 sm:p-7">
-            <p className="eyebrow">Matrix kapsamı</p>
-            <div className="mt-5 flex items-end gap-1">
+            <p className="eyebrow">Son 24 saat</p>
+            <div className="mt-5 flex items-baseline gap-2">
               <span className="figure text-5xl font-bold leading-none sm:text-6xl">
-                {data.coveragePercentage}
+                {data.todaySignals}
               </span>
-              <span className="figure mb-1 text-2xl font-semibold text-muted-foreground">%</span>
+              <span className="text-sm font-medium text-muted-foreground">yeni gelişme</span>
             </div>
-            <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <p className="mt-4 text-xs text-muted-foreground tabular-nums">
+              {data.tweets24h} tweet · {data.announcements24h} duyuru · {data.news24h} haber
+            </p>
+          </div>
+
+          {/* Medium: matrix coverage (demoted from hero) */}
+          <div className="p-6 sm:p-7">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Grid3X3 className="h-4 w-4" />
+              <span className="text-xs font-medium">Matrix kapsamı</span>
+            </div>
+            <p className="figure mt-4 text-3xl font-bold tabular-nums">
+              {data.coveragePercentage}%
+            </p>
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-primary"
                 style={{ width: `${data.coveragePercentage}%` }}
               />
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Borsa × özellik matrisinin doluluk oranı
-            </p>
           </div>
 
           {/* Medium: exchanges */}
@@ -288,8 +312,13 @@ export default async function DashboardPage() {
                 <s.icon className="h-3.5 w-3.5" />
                 {s.label}
               </span>
-              <span className="figure text-lg font-semibold tabular-nums">
-                {s.value}
+              <span className="flex items-baseline gap-1.5">
+                {s.delta > 0 && (
+                  <span className="text-[11px] font-semibold text-primary tabular-nums">
+                    +{s.delta}
+                  </span>
+                )}
+                <span className="figure text-lg font-semibold tabular-nums">{s.value}</span>
               </span>
             </Link>
           ))}
