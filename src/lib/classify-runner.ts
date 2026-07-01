@@ -81,6 +81,10 @@ function applyOverrides(
   overrides: { axis: string; label: string; action: string; confidence: number | null }[]
 ): ClassificationOutcome {
   if (overrides.length === 0) return outcome;
+  // A human already adjudicated this screen via the §8 feedback loop. Keep it
+  // resolved across re-classification / taxonomy bumps: never re-raise the flag.
+  outcome.needs_review = false;
+  outcome.review_reason = "İnceleme tamamlandı — kullanıcı düzeltti";
   const axisFor = (a: string) => (a === "A" ? outcome.axis_a : outcome.axis_b);
   for (const ov of overrides) {
     const arr = axisFor(ov.axis);

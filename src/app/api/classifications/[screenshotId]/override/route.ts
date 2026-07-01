@@ -145,6 +145,17 @@ export async function POST(
           });
         }
       }
+
+      // A human has adjudicated this screen (§8): mark it resolved so it drops
+      // off the İncelemeler / review queue immediately. LabelOverride rows persist
+      // separately, so this resolution survives re-classification (see classify-runner).
+      await tx.screenshotClassification.update({
+        where: { id: classification.id },
+        data: {
+          needsReview: false,
+          reviewReason: "İnceleme tamamlandı — kullanıcı düzeltti",
+        },
+      });
     });
   }
 
