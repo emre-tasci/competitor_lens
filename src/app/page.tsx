@@ -331,7 +331,13 @@ export default async function DashboardPage() {
             </div>
             <div className="divide-rows px-5 pb-2">
               {data.criticalAnnouncements.map((a) => (
-                <div key={a.id} className="py-3">
+                <a
+                  key={a.id}
+                  href={a.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block -mx-2 rounded-md px-2 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                >
                   <div className="mb-1 flex items-center gap-2">
                     <span className="text-xs font-medium">{a.exchange.name}</span>
                     <Badge
@@ -345,14 +351,15 @@ export default async function DashboardPage() {
                     >
                       {a.importance === "critical" ? "Kritik" : "Yüksek"}
                     </Badge>
+                    <ArrowUpRight className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                   </div>
-                  <p className="text-sm font-medium leading-snug">{a.title}</p>
+                  <p className="text-sm font-medium leading-snug group-hover:underline decoration-1 underline-offset-2">{a.title}</p>
                   {a.aiSummary && (
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">
                       {a.aiSummary}
                     </p>
                   )}
-                </div>
+                </a>
               ))}
             </div>
           </section>
@@ -414,7 +421,13 @@ export default async function DashboardPage() {
                 {data.recentAnnouncements.length > 0 ? (
                   <div className="divide-rows">
                     {data.recentAnnouncements.map((a) => (
-                      <div key={a.id} className="py-3">
+                      <a
+                        key={a.id}
+                        href={a.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group block -mx-2 rounded-md px-2 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                      >
                         <div className="flex items-center gap-2">
                           <span className="truncate text-xs font-medium">{a.exchange.name}</span>
                           {a.aiCategory && (
@@ -427,8 +440,8 @@ export default async function DashboardPage() {
                             {a.publishedAt ? timeAgo(a.publishedAt) : timeAgo(a.collectedAt)}
                           </span>
                         </div>
-                        <p className="mt-1 text-sm font-medium leading-snug line-clamp-2">{a.title}</p>
-                      </div>
+                        <p className="mt-1 text-sm font-medium leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{a.title}</p>
+                      </a>
                     ))}
                   </div>
                 ) : (
@@ -440,7 +453,13 @@ export default async function DashboardPage() {
                 {data.recentNews.length > 0 ? (
                   <div className="divide-rows">
                     {data.recentNews.map((n) => (
-                      <div key={n.id} className="py-3">
+                      <a
+                        key={n.id}
+                        href={n.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group block -mx-2 rounded-md px-2 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                      >
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="h-4 px-1 text-[10px]">
                             {n.source}
@@ -452,8 +471,8 @@ export default async function DashboardPage() {
                             {n.publishedAt ? timeAgo(n.publishedAt) : timeAgo(n.collectedAt)}
                           </span>
                         </div>
-                        <p className="mt-1 text-sm font-medium leading-snug line-clamp-2">{n.title}</p>
-                      </div>
+                        <p className="mt-1 text-sm font-medium leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{n.title}</p>
+                      </a>
                     ))}
                   </div>
                 ) : (
@@ -469,7 +488,13 @@ export default async function DashboardPage() {
               {data.highlightTweets.length > 0 ? (
                 <div className="divide-rows">
                   {data.highlightTweets.map((t) => (
-                    <div key={t.id} className="py-3">
+                    <a
+                      key={t.id}
+                      href={`https://x.com/${t.authorHandle}/status/${t.tweetId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block -mx-2 rounded-md px-2 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    >
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-medium">{t.exchange.name}</span>
                         <span className="truncate text-xs text-muted-foreground">@{t.authorHandle}</span>
@@ -477,7 +502,7 @@ export default async function DashboardPage() {
                           {timeAgo(t.publishedAt)}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm leading-snug line-clamp-3">{t.content}</p>
+                      <p className="mt-1 text-sm leading-snug line-clamp-3 group-hover:underline decoration-1 underline-offset-2">{t.content}</p>
                       <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
                         <span className="flex items-center gap-1 tabular-nums">
                           <Heart className="h-3 w-3" />
@@ -488,7 +513,7 @@ export default async function DashboardPage() {
                           {formatNumber(t.retweetCount)}
                         </span>
                       </div>
-                    </div>
+                    </a>
                   ))}
                 </div>
               ) : (
@@ -500,15 +525,21 @@ export default async function DashboardPage() {
               {data.recentTweets.length > 0 ? (
                 <div className="divide-rows">
                   {data.recentTweets.map((t) => (
-                    <div key={t.id} className="py-3">
+                    <a
+                      key={t.id}
+                      href={`https://x.com/${t.authorHandle}/status/${t.tweetId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block -mx-2 rounded-md px-2 py-3 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    >
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-medium">{t.exchange.name}</span>
                         <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
                           {timeAgo(t.publishedAt)}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm leading-snug line-clamp-2">{t.content}</p>
-                    </div>
+                      <p className="mt-1 text-sm leading-snug line-clamp-2 group-hover:underline decoration-1 underline-offset-2">{t.content}</p>
+                    </a>
                   ))}
                 </div>
               ) : (

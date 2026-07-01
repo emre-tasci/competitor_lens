@@ -60,13 +60,13 @@ export default function UpdatesPage() {
   const [processing, setProcessing] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [tab, setTab] = useState("pending");
-  const [minConfidence, setMinConfidence] = useState("");
+  const [minConfidence, setMinConfidence] = useState("all");
 
   const loadSuggestions = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
     params.set("status", tab);
-    if (minConfidence) params.set("minConfidence", minConfidence);
+    if (minConfidence && minConfidence !== "all") params.set("minConfidence", minConfidence);
 
     try {
       const res = await fetch(`/api/updates?${params}`);
@@ -159,7 +159,7 @@ export default function UpdatesPage() {
                 <SelectValue placeholder="Min güven" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Hepsi</SelectItem>
+                <SelectItem value="all">Hepsi</SelectItem>
                 <SelectItem value="0.5">50%+</SelectItem>
                 <SelectItem value="0.7">70%+</SelectItem>
                 <SelectItem value="0.8">80%+</SelectItem>
