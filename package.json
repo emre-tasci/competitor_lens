@@ -13,7 +13,8 @@
     "db:seed": "npx prisma db seed",
     "db:studio": "npx prisma studio",
     "import-screenshots": "npx tsx scripts/import-s3-screenshots.ts",
-    "import-matrix": "npx tsx scripts/import-feature-matrix.ts"
+    "import-matrix": "npx tsx scripts/import-feature-matrix.ts",
+    "classify": "npx tsx scripts/classify-screenshots.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

@@ -13,20 +13,20 @@ model Exchange {
   name            String
   logoUrl         String?
   websiteUrl      String?
-  twitterHandle   String?  // e.g. "binance", "btcturkpro"
-  announcementUrl String?  // URL to announcements/blog page for scraping
-  marketType      String   // 'turkish' | 'global'
+  twitterHandle   String? // e.g. "binance", "btcturkpro"
+  announcementUrl String? // URL to announcements/blog page for scraping
+  marketType      String // 'turkish' | 'global'
   description     String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  screenshots      Screenshot[]
-  exchangeFeatures ExchangeFeature[]
+  screenshots       Screenshot[]
+  exchangeFeatures  ExchangeFeature[]
   updateSuggestions FeatureUpdateSuggestion[]
-  tweets           Tweet[]
-  announcements    ExchangeAnnouncement[]
-  newsArticles     NewsArticle[]
-  aiAnalyses       AIAnalysis[]
+  tweets            Tweet[]
+  announcements     ExchangeAnnouncement[]
+  newsArticles      NewsArticle[]
+  aiAnalyses        AIAnalysis[]
 
   @@map("exchanges")
 }
@@ -54,9 +54,9 @@ model Feature {
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
 
-  category         FeatureCategory          @relation(fields: [categoryId], references: [id])
-  screenshots      Screenshot[]
-  exchangeFeatures ExchangeFeature[]
+  category          FeatureCategory           @relation(fields: [categoryId], references: [id])
+  screenshots       Screenshot[]
+  exchangeFeatures  ExchangeFeature[]
   updateSuggestions FeatureUpdateSuggestion[]
 
   @@map("features")
@@ -80,10 +80,125 @@ model Screenshot {
   feature  Feature?         @relation(fields: [featureId], references: [id])
   category FeatureCategory? @relation(fields: [categoryId], references: [id])
 
+  classifications ScreenshotClassification[]
+  labelOverrides  LabelOverride[]
+  taxonomyGaps    TaxonomyGapLog[]
+
   @@index([exchangeId])
   @@index([featureId])
   @@index([classifiedAt])
   @@map("screenshots")
+}
+
+// ===== TWO-AXIS SCREENSHOT CLASSIFICATION (taxonomy 2026-07-01) =====
+// Canonical §7 record. One row per (screenshot, taxonomyVersion). The old
+// Screenshot.aiClassification single-axis field is VOID and untouched here.
+
+model ScreenshotClassification {
+  id              String @id @default(uuid())
+  screenshotId    String
+  contentHash     String // sha256 of image bytes — dedup key (§6)
+  taxonomyVersion String // e.g. "2026-07-01" — bump => full re-classify
+
+  // Provenance / inference
+  sourceApp           String?
+  sourceAppConfidence Float?
+  capturedPlatform    String? // ios | android | web | unknown
+  language            String?
+
+  // Model policy audit (§3 / §9)
+  modelTier Int // 1 (bulk, non-reasoning) | 2 (adjudication, reasoning)
+  modelName String
+  modelMode String // non_reasoning | reasoning
+
+  // §5.4 overlay + §7 fields
+  overlayPresent Boolean  @default(false)
+  salientText    String[] @default([]) // OCR anchors that drove the decision
+  rationale      String   @default("")
+  needsReview    Boolean  @default(false)
+  reviewReason   String?
+
+  classifiedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  screenshot Screenshot            @relation(fields: [screenshotId], references: [id], onDelete: Cascade)
+  labels     ClassificationLabel[]
+
+  @@unique([screenshotId, taxonomyVersion]) // idempotency (§6)
+  @@index([contentHash, taxonomyVersion]) // dedup lookup / identical bytes
+  @@index([taxonomyVersion])
+  @@index([sourceApp])
+  @@index([capturedPlatform])
+  @@index([language])
+  @@index([needsReview])
+  @@index([overlayPresent])
+  @@index([classifiedAt])
+  @@map("screenshot_classifications")
+}
+
+// Per-axis, per-label row so multi-label screens are faceted/filtered
+// natively (a screenshot appears under ALL its labels, primary or secondary).
+model ClassificationLabel {
+  id               String  @id @default(uuid())
+  classificationId String
+  axis             String // "A" (functional area) | "B" (ui screen type)
+  label            String // exact §4 slug, e.g. "withdraw:address_entry" / "ui:form"
+  isPrimary        Boolean @default(false) // exactly one per axis per classification
+  confidence       Float
+
+  classification ScreenshotClassification @relation(fields: [classificationId], references: [id], onDelete: Cascade)
+
+  @@index([classificationId])
+  @@index([axis, label])
+  @@index([label])
+  @@index([isPrimary])
+  @@map("classification_labels")
+}
+
+// §8 human-in-the-loop feedback loop. Authoritative corrections that the
+// classifier MUST respect and NEVER overwrite. Keyed by screenshot (NOT by a
+// classification row) so a correction survives re-classification AND taxonomy
+// bumps (acceptance criterion). Applied as a post-pass over model output.
+model LabelOverride {
+  id           String  @id @default(uuid())
+  screenshotId String
+  axis         String // "A" | "B"
+  label        String // §4 slug the correction targets
+  action       String // "add" | "remove" | "set_primary"
+  confidence   Float? // optional override confidence for added labels
+  reviewedBy   String? // designer/PM identifier
+  note         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screenshot Screenshot @relation(fields: [screenshotId], references: [id], onDelete: Cascade)
+
+  @@unique([screenshotId, axis, label, action])
+  @@index([screenshotId])
+  @@index([axis, label])
+  @@map("label_overrides")
+}
+
+// §5.6 running taxonomy gap log — out-of-scope screens propose new slugs for
+// PM approval. Never auto-added to the closed vocabulary.
+model TaxonomyGapLog {
+  id              String  @id @default(uuid())
+  screenshotId    String?
+  taxonomyVersion String
+  proposedArea    String? // suggested Axis-A area
+  proposedScreen  String? // suggested Axis-A screen slug
+  reason          String
+  resolved        Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  screenshot Screenshot? @relation(fields: [screenshotId], references: [id], onDelete: SetNull)
+
+  @@index([resolved])
+  @@index([taxonomyVersion])
+  @@map("taxonomy_gap_log")
 }
 
 model ExchangeFeature {
@@ -143,22 +258,22 @@ model FeatureUpdateLog {
 // ===== COMPETITIVE INTELLIGENCE MODELS =====
 
 model Tweet {
-  id             String   @id @default(uuid())
-  exchangeId     String
-  tweetId        String   @unique // Twitter/X tweet ID
-  authorHandle   String
-  authorName     String
-  content        String
-  publishedAt    DateTime
-  likeCount      Int      @default(0)
-  retweetCount   Int      @default(0)
-  replyCount     Int      @default(0)
-  viewCount      Int      @default(0)
-  mediaUrls      Json?    // array of media URLs
-  aiSummary      String?  // AI-generated summary/analysis
-  aiSentiment    String?  // "positive" | "negative" | "neutral"
-  isHighlight    Boolean  @default(false) // high engagement tweet
-  collectedAt    DateTime @default(now())
+  id           String   @id @default(uuid())
+  exchangeId   String
+  tweetId      String   @unique // Twitter/X tweet ID
+  authorHandle String
+  authorName   String
+  content      String
+  publishedAt  DateTime
+  likeCount    Int      @default(0)
+  retweetCount Int      @default(0)
+  replyCount   Int      @default(0)
+  viewCount    Int      @default(0)
+  mediaUrls    Json? // array of media URLs
+  aiSummary    String? // AI-generated summary/analysis
+  aiSentiment  String? // "positive" | "negative" | "neutral"
+  isHighlight  Boolean  @default(false) // high engagement tweet
+  collectedAt  DateTime @default(now())
 
   exchange Exchange @relation(fields: [exchangeId], references: [id])
 
@@ -169,17 +284,17 @@ model Tweet {
 }
 
 model ExchangeAnnouncement {
-  id           String   @id @default(uuid())
-  exchangeId   String
-  title        String
-  content      String?  // scraped content
-  url          String   @unique // original announcement URL
-  imageUrl     String?
-  publishedAt  DateTime?
-  aiSummary    String?  // AI-generated summary
-  aiCategory   String?  // "listing" | "feature" | "maintenance" | "partnership" | "regulation" | "other"
-  importance   String   @default("normal") // "critical" | "high" | "normal" | "low"
-  collectedAt  DateTime @default(now())
+  id          String    @id @default(uuid())
+  exchangeId  String
+  title       String
+  content     String? // scraped content
+  url         String    @unique // original announcement URL
+  imageUrl    String?
+  publishedAt DateTime?
+  aiSummary   String? // AI-generated summary
+  aiCategory  String? // "listing" | "feature" | "maintenance" | "partnership" | "regulation" | "other"
+  importance  String    @default("normal") // "critical" | "high" | "normal" | "low"
+  collectedAt DateTime  @default(now())
 
   exchange Exchange @relation(fields: [exchangeId], references: [id])
 
@@ -190,19 +305,19 @@ model ExchangeAnnouncement {
 }
 
 model NewsArticle {
-  id           String   @id @default(uuid())
-  exchangeId   String?  // nullable - might be general crypto news
-  title        String
-  content      String?
-  url          String   @unique
-  source       String   // e.g. "CoinDesk", "CoinTelegraph"
-  imageUrl     String?
-  publishedAt  DateTime?
-  aiSummary    String?
-  aiSentiment  String?  // "positive" | "negative" | "neutral"
-  aiRelevance  Float?   // 0.0-1.0 relevance to competitive intelligence
-  tags         Json?    // array of tags
-  collectedAt  DateTime @default(now())
+  id          String    @id @default(uuid())
+  exchangeId  String? // nullable - might be general crypto news
+  title       String
+  content     String?
+  url         String    @unique
+  source      String // e.g. "CoinDesk", "CoinTelegraph"
+  imageUrl    String?
+  publishedAt DateTime?
+  aiSummary   String?
+  aiSentiment String? // "positive" | "negative" | "neutral"
+  aiRelevance Float? // 0.0-1.0 relevance to competitive intelligence
+  tags        Json? // array of tags
+  collectedAt DateTime  @default(now())
 
   exchange Exchange? @relation(fields: [exchangeId], references: [id])
 
@@ -214,12 +329,12 @@ model NewsArticle {
 
 model AIAnalysis {
   id           String   @id @default(uuid())
-  exchangeId   String?  // nullable for industry-wide analyses
-  analysisType String   // "daily_brief" | "weekly_summary" | "competitor_alert" | "trend_analysis"
+  exchangeId   String? // nullable for industry-wide analyses
+  analysisType String // "daily_brief" | "weekly_summary" | "competitor_alert" | "trend_analysis"
   title        String
-  content      String   // markdown content
-  dataSources  Json?    // references to tweets/news/announcements used
-  period       String?  // e.g. "2024-01-15", "2024-W03"
+  content      String // markdown content
+  dataSources  Json? // references to tweets/news/announcements used
+  period       String? // e.g. "2024-01-15", "2024-W03"
   createdAt    DateTime @default(now())
 
   exchange Exchange? @relation(fields: [exchangeId], references: [id])

@@ -226,7 +226,7 @@ export default async function DashboardPage() {
         eyebrow="Canlı · Sektör paneli"
         title="Product Terminali"
         size="display"
-        description="Kripto borsa sektörünü tek ekrandan izleyin — rakiplerin yeni özellikleri, duyuruları ve gündemi bir arada."
+        description="Kripto borsa sektörünü tek ekrandan izleyin - uygulamaların yeni özellikleri, duyuruları ve gündemi bir arada."
       />
 
       {/* Metrics band — one panel, real hierarchy by scale (hero figure +

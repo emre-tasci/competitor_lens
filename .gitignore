@@ -44,3 +44,6 @@ next-env.d.ts
 # scratch scripts & agent working memory
 _*_tmp.ts
 .claude/agent-memory/
+
+# runtime classification logs
+logs/

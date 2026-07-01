@@ -125,7 +125,8 @@ the dashboard hero), `divider?`. The dashboard H1 is the bare product name
   Yönetim) — Mercury-style tiered IA, not a flat list. Active item =
   `bg-accent text-foreground` + a short 3px red rounded indicator pinned to the
   rail's left edge (icon turns red); inactive hover shows the indicator at 40%.
-  Logo = red `#dc0005` box + wordmark + muted "Rakip ürün takibi" subline.
+  Logo = the "layered screens" mark (`src/components/Logo.tsx` — a red `#dc0005`
+  tile with two offset white screen frames) + wordmark + muted "Ürün takibi" subline.
 - **Feature Matrix** (`FeatureMatrix.tsx`) — sticky header + sticky first
   column, each with a right/down shadow for depth on scroll. Category rows are
   neutral (`bg-muted`), not red. Whole rows highlight on hover.

@@ -15,6 +15,7 @@ import {
   Megaphone,
   Newspaper,
   Brain,
+  Images,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ import {
 import { useEffect, useState } from "react";
 import { GlobalSearch } from "./GlobalSearch";
 import { ThemeToggle } from "./ThemeToggle";
+import { Logo } from "./Logo";
 
 type NavItem = {
   href: string;
@@ -55,6 +57,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
       { href: "/exchanges", label: "Borsalar", icon: Building2 },
       { href: "/features", label: "Özellikler", icon: ListChecks },
       { href: "/matrix", label: "Feature Matrix", icon: Grid3X3 },
+      { href: "/screens", label: "Ekranlar", icon: Images },
     ],
   },
 ];
@@ -135,15 +138,13 @@ function SidebarContent({
           className="flex items-center gap-3"
           onClick={onNavClick}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#dc0005] shadow-sm">
-            <Grid3X3 className="h-[18px] w-[18px] text-white" />
-          </div>
+          <Logo className="h-9 w-9 rounded-xl shadow-sm" />
           <div className="flex flex-col leading-none">
             <span className="text-[15px] font-bold tracking-tight">
               Product Terminali
             </span>
             <span className="mt-1 text-[11px] font-medium text-muted-foreground">
-              Rakip ürün takibi
+              Ürün takibi
             </span>
           </div>
         </Link>
@@ -276,9 +277,7 @@ export function Navigation() {
           </SheetContent>
         </Sheet>
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#dc0005]">
-            <Grid3X3 className="h-4 w-4 text-white" />
-          </div>
+          <Logo className="h-7 w-7 rounded-lg" />
           <span className="text-sm font-bold tracking-tight">Product Terminali</span>
         </Link>
         <ThemeToggle />

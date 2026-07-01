@@ -1,0 +1,74 @@
+{
+  "type": "frontend_build_request",
+  "target_agent": "frontend",
+  "contract_version": 1,
+  "taxonomy_version": "2026-07-01",
+  "deliverable": "Screenshot search & review console for designers and PMs",
+  "data_contract": {
+    "record_schema": "§7 canonical record — persisted as ScreenshotClassification + ClassificationLabel rows (prisma/schema.prisma)",
+    "records_source": "classification store (Prisma / Neon) via new /api/classifications* routes",
+    "prisma_models": {
+      "ScreenshotClassification": "screenshot_classifications — one row per (screenshotId, taxonomyVersion)",
+      "ClassificationLabel": "classification_labels — one row per (classification, axis, label); faceting join",
+      "LabelOverride": "label_overrides — screenshot-keyed authoritative corrections (feedback loop)",
+      "TaxonomyGapLog": "taxonomy_gap_log — out-of-scope proposals for PM review"
+    },
+    "label_vocabulary": {
+      "source": "src/lib/taxonomy.ts",
+      "axis_a": "slug -> { display, area } (AXIS_A_AREAS)",
+      "axis_b": "slug -> { display, group: base|overlay|state } (AXIS_B_GROUPS)"
+    },
+    "facets": [
+      "axis_a (grouped by area, expandable)",
+      "axis_b (grouped by base / overlay / state)",
+      "source_app",
+      "captured_platform",
+      "language",
+      "confidence (range slider, on primary label)",
+      "overlay_present (toggle)",
+      "needs_review (toggle)",
+      "classified_at (date range)"
+    ]
+  },
+  "backend_routes": [
+    "GET /api/classifications (faceted search, secondaries matched, per-axis AND/OR)",
+    "GET /api/classifications/facets (live counts for active filter set)",
+    "GET /api/classifications/[screenshotId] (detail)",
+    "GET /api/classifications/coverage-matrix (Axis-A x source_app counts)",
+    "GET /api/classifications/pattern (cross-app pivot on one Axis-B or Axis-A slug)",
+    "POST /api/classifications/[screenshotId]/override (feedback loop write; never overwritten)",
+    "GET /api/classifications/export (CSV + image zip of filtered set)",
+    "GET /api/classifications/gaps (taxonomy gap review)"
+  ],
+  "ui_pages": [
+    "/screens (gallery + faceted filter rail + live counts + export)",
+    "/screens/[id] (detail + inline correction UI)",
+    "/screens/patterns (cross-app pattern pivot)",
+    "/screens/coverage (coverage matrix)",
+    "/screens/review (review queue + gap log)"
+  ],
+  "ui_requirements": [
+    "Gallery grid of thumbnails as default view; lazy-loaded.",
+    "Faceted filtering: multi-select within a facet, AND across facets, per-facet AND/OR toggle. Matching MUST include secondary labels.",
+    "Live facet counts per label.",
+    "Full-text search over source_app, salient_text, rationale, and label display names.",
+    "Detail view: full image + all tags both axes (primary vs secondary, confidence), source app, platform, model+tier, taxonomy_version, timestamp.",
+    "Cross-app pattern view (pivot on Axis-B type and on Axis-A slug).",
+    "Coverage matrix: Axis-A screens x source_app.",
+    "Review queue: needs_review == true with review_reason.",
+    "Human-in-the-loop correction written back as authoritative LabelOverride the classifier respects and never overwrites.",
+    "Export filtered set (CSV + zip)."
+  ],
+  "acceptance_criteria": [
+    "Every §7 field is filterable or visible somewhere in the UI.",
+    "Multi-label screens appear under ALL their labels' filters, on both axes.",
+    "A corrected label survives re-classification and taxonomy-version bumps."
+  ],
+  "conventions": {
+    "images": "Screenshot.s3Url is an S3 key; resolve via getPresignedScreenshotUrl/getScreenshotUrl in src/lib/s3.ts",
+    "db": "import { prisma } from '@/lib/db'",
+    "admin_guard": "src/lib/adminToken.ts (as in src/app/api/admin)",
+    "design": "invoke the design-system skill (StableX Product Terminali) before styling",
+    "scope": "always filter to TAXONOMY_VERSION from src/lib/taxonomy.ts; never read the void Screenshot.aiClassification"
+  }
+}

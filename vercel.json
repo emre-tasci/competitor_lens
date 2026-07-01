@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/collect-intel",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/classify-screenshots",
+      "schedule": "0 3 * * *"
     }
   ]
 }
