@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ExternalLink, Inbox, Layers } from "lucide-react";
+import { AlertTriangle, ExternalLink, Inbox, Layers, CheckCheck } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,25 @@ function ReviewQueue() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const [resolving, setResolving] = useState<string | null>(null);
+
+  const markReviewed = useCallback(
+    async (screenshotId: string) => {
+      setResolving(screenshotId);
+      try {
+        await fetch(`/api/classifications/${screenshotId}/resolve`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reviewedBy: "admin" }),
+        });
+        load();
+      } finally {
+        setResolving(null);
+      }
+    },
+    [load]
+  );
 
   useEffect(() => {
     load();
@@ -92,12 +111,23 @@ function ReviewQueue() {
                       {item.reviewReason || "İnceleme gerekli"}
                     </p>
                   </div>
-                  <Link
-                    href={`/screens/${item.screenshotId}`}
-                    className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    Detay <ExternalLink className="h-3 w-3" />
-                  </Link>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => markReviewed(item.screenshotId)}
+                      disabled={resolving === item.screenshotId}
+                      className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium transition-colors hover:bg-accent/60 disabled:opacity-50"
+                    >
+                      <CheckCheck className="h-3.5 w-3.5" />
+                      İncelendi
+                    </button>
+                    <Link
+                      href={`/screens/${item.screenshotId}`}
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Detay <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
